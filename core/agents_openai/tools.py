@@ -8,6 +8,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.telegram_client import bot
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from templates.email_template import email_template
+from datetime import datetime, timedelta
+import asyncio
 
 load_dotenv()
 
@@ -57,3 +59,39 @@ def send_email(body: str) -> str:
     except Exception as e:
         return f"Error al enviar email: {str(e)}"
     
+from apscheduler.schedulers.background import BackgroundScheduler
+from integrations.telegram_client import bot 
+scheduler = BackgroundScheduler()
+scheduler.start()
+
+# Esta es la función que se ejecutará cuando suene la alarma
+def send_message(chat_id, mensaje):
+    loop_del_bot = bot._loop 
+
+    if loop_del_bot and loop_del_bot.is_running():
+        asyncio.run_coroutine_threadsafe(
+            bot.send_message(chat_id, mensaje),
+            loop_del_bot
+        )
+    else:
+        print("Error: El bot no está conectado o el loop murió.")
+        
+@function_tool
+def set_reminder(mensaje: str, minutos: int) -> str:
+    # 1. Calculamos cuándo debe enviarse
+    fecha_ejecucion = datetime.now() + timedelta(minutes=minutos)
+    
+    try:
+        # 2. Agregamos la tarea al planificador
+        # Le decimos: "Ejecuta 'tarea_enviar_mensaje' en la fecha X con estos argumentos"
+        scheduler.add_job(
+            send_message, 
+            'date', 
+            run_date=fecha_ejecucion, 
+            args=["mauroradino", mensaje] # Argumentos para la función
+        )
+        
+        return f"Listo. He programado el recordatorio internamente para las {fecha_ejecucion.strftime('%H:%M')}."
+        
+    except Exception as e:
+        return f"Error al programar internamente: {str(e)}"
