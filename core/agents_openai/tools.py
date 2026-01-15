@@ -56,3 +56,4 @@ def send_email(body: str) -> str:
         return "Email sent successfully."
     except Exception as e:
         return f"Error al enviar email: {str(e)}"
+    
