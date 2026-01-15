@@ -10,7 +10,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from templates.email_template import email_template
 from datetime import datetime, timedelta
 import asyncio
-
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from integrations.supabase_client import supabase
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
@@ -95,3 +97,26 @@ def set_reminder(mensaje: str, minutos: int) -> str:
         
     except Exception as e:
         return f"Error al programar internamente: {str(e)}"
+
+
+@function_tool
+def update_user_info(key: str, value: str, telegram_id: str) -> str:
+    """
+    Updates user information in the database.
+    Args:
+        key (str): The field to update.
+        value (str): The new value for the field.
+        telegram_id (str): The Telegram ID of the user.
+        Returns:
+        str: Confirmation message or error.
+    """
+    try:
+        res = supabase.table("Users").update({key: value}).eq("telegram_id", telegram_id).execute()
+        
+        if len(res.data) > 0:
+            return f"Éxito: Se actualizó {key} a '{value}'."
+        else:
+            return "Aviso: No se encontró ningún usuario con ese ID para actualizar."
+
+    except Exception as e:
+        return f"Error crítico: {str(e)}"

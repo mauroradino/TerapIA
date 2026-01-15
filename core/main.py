@@ -3,6 +3,8 @@ import sys
 from pathlib import Path
 from audio.audio_processor import transcribe_audio
 from agents import Runner
+from utils.registered_verification import is_registered
+from utils.set_new_user import set_new_user
 from agents_openai.doctor_agent import doctor_agent
 from agents_openai.QA_agent import QA_agent
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -15,6 +17,7 @@ with open(transcription_path, "r", encoding="utf-8") as file:
 async def handler_audio(event):
     sender = await event.get_sender()
     usuario_id = sender.id
+    print("USER ID:", usuario_id)
     
     print(f"Receiving audio from: {usuario_id}...")
 
@@ -32,12 +35,15 @@ async def handler_audio(event):
 async def handler_text(event):
     sender = await event.get_sender()
     usuario_id = sender.id
-    
+    user_data = is_registered(usuario_id) 
+    if not user_data:
+        set_new_user(str(usuario_id)) 
+        user_data = [{"telegram_id": usuario_id, "name": "", "surname": "", "age": ""}]
     print(f"Receiving text from: {usuario_id}...")
     user_message = event.message.message
     print(f"Message received: {user_message}")
     
-    response = await Runner.run(QA_agent, f"{user_message}. Esta es la transcripción de la consulta médica: {transcription}")
+    response = await Runner.run(QA_agent, f"{user_message}. Esta es la transcripción de la consulta médica: {transcription} y este el id de telegram del usuario: {usuario_id}. La informacion del usuario es: {user_data}")
     await event.reply(response.final_output)
 
 print("Bot listening audios...")
