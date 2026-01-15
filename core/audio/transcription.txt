@@ -1,0 +1,27 @@
+Speaker_01: Hola, buenos días. Pase, siéntese por favor. Cuénteme, ¿qué lo trae por acá hoy?
+
+Speaker_02: Hola doctor. Mire, la verdad es que vengo porque no doy más de la tos. Empecé hace unos... cuatro o cinco días, pensé que era un resfrío común, pero ayer a la noche ya no pude dormir. Siento como una presión acá en el pecho.
+
+Speaker_01: Entiendo. Esa tos, ¿es seca o siente que tiene flema?
+
+Speaker_02: Al principio era seca, pero ahora sí, tengo bastante flema. Es como verdosa. Y ayer tuve un poco de fiebre, me tomé la temperatura y tenía 38,2.
+
+Speaker_01: Ok, 38,2. ¿Tomó algo para la fiebre?
+
+Speaker_02: Sí, un paracetamol de 500, y me bajó un poco. Pero me siento muy decaído.
+
+Speaker_01: Bien, vamos a auscultar un momento... Respire hondo... Suelte... Otra vez... Bien. Se escuchan algunos ruidos en la base del pulmón derecho, parece un principio de bronquitis. Dígame, ¿es alérgico a la penicilina o a algún medicamento?
+
+Speaker_02: No, no. Que yo sepa, no. He tomado amoxicilina antes y no me pasó nada.
+
+Speaker_01: Perfecto. Entonces vamos a hacer lo siguiente. Le voy a indicar un antibiótico. Va a tomar Amoxicilina de 875 miligramos. Es importante que la tome cada 12 horas durante 7 días. Aunque se sienta mejor al tercer día, termine la caja, por favor.
+
+Speaker_02: Ok, cada 12 horas, 7 días. ¿Y para la tos?
+
+Speaker_01: Para la tos y el malestar general le voy a dar Ibuprofeno 600 miligramos, ese tómelo cada 8 horas, pero solo si tiene dolor o fiebre. Si no le duele nada, no lo tome. Y mucha agua, al menos dos litros por día para aflojar esa flema.
+
+Speaker_02: Entendido. Doctor, ¿y si me sigue subiendo la fiebre?
+
+Speaker_01: Buena pregunta. Si la fiebre supera los 39 grados o si empieza a sentir que le falta el aire estando quieto, quiero que vaya a la guardia inmediatamente. No espere al turno.
+
+Speaker_02: Dale, muchas gracias doctor.
