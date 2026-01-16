@@ -15,21 +15,10 @@ with open(transcription_path, "r", encoding="utf-8") as file:
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.voice or e.audio))
 async def handler_audio(event):
-    sender = await event.get_sender()
-    usuario_id = sender.id
-    print("USER ID:", usuario_id)
-    
-    print(f"Receiving audio from: {usuario_id}...")
-
-    ruta_archivo = await event.download_media(file=f"audios/audio_test.ogg")
-    
-    print(f"Audio saved in: {ruta_archivo}")
-    
+    await event.download_media(file=f"audios/audio_test.ogg")
     await event.reply("Hi! I hope everything went well at your medical appointment. I'm processing the information and will contact you soon.")
     transcription = transcribe_audio()
-    
     response = await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
-    print(response.final_output)
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
@@ -39,11 +28,8 @@ async def handler_text(event):
     if not user_data:
         set_new_user(str(usuario_id)) 
         user_data = [{"telegram_id": usuario_id, "name": "", "surname": "", "age": ""}]
-    print(f"Receiving text from: {usuario_id}...")
     user_message = event.message.message
-    print(f"Message received: {user_message}")
-    
-    response = await Runner.run(QA_agent, f"{user_message}. Esta es la transcripción de la consulta médica: {transcription} y este el id de telegram del usuario: {usuario_id}. La informacion del usuario es: {user_data}")
+    response = await Runner.run(QA_agent, f"El usuario dice: {user_message}. Esta es la transcripción de la consulta médica: {transcription} y este el id de telegram del usuario: {usuario_id}. La informacion del usuario es: {user_data}")
     await event.reply(response.final_output)
 
 print("Bot listening audios...")

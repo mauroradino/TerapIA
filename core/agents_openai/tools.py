@@ -13,6 +13,7 @@ import asyncio
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
+import requests
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
@@ -120,3 +121,21 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
 
     except Exception as e:
         return f"Error crítico: {str(e)}"
+    
+
+@function_tool
+def IDC_codes(disease: str):
+    """
+    Provides ICD codes for a given disease.
+    
+    Args:
+        disease (str): The name of the disease.
+    Returns:
+        str: ICD codes or error message.
+    """
+    res = requests.get(f"https://clinicaltables.nlm.nih.gov/api/icd11_codes/v3/search?terms={disease}")
+    if res.status_code == 200:
+        data = res.json()
+        return data[3]
+    else:
+        return "Error al obtener los códigos IDC."
