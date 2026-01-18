@@ -1,12 +1,11 @@
-from agents import Agent
+from agents import Agent, set_trace_processors
 from dotenv import load_dotenv
 from agents_openai.prompts import QA_prompt
 from agents_openai.tools import set_reminder, update_user_info
-from opik.integrations.openai import track_openai
-import openai 
+from opik.integrations.openai.agents import OpikTracingProcessor
 load_dotenv()
 
-track_openai(openai.OpenAI())
+set_trace_processors(processors=[OpikTracingProcessor()])
 
 
 

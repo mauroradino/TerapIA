@@ -19,7 +19,6 @@ load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
-@track(name="send_telegram_message_tool")
 @function_tool
 async def send_telegram_message(message: str) -> str:
     """

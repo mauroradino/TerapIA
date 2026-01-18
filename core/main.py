@@ -21,7 +21,6 @@ async def handler_audio(event):
     transcription = transcribe_audio()
     response = await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
 
-@track(name="calling_qa_agent")
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
     sender = await event.get_sender()
