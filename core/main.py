@@ -7,6 +7,7 @@ from utils.registered_verification import is_registered
 from utils.set_new_user import set_new_user
 from agents_openai.doctor_agent import doctor_agent
 from agents_openai.QA_agent import QA_agent
+from opik import track
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from integrations.telegram_client import bot
 transcription_path = Path(__file__).parent/ 'audio' / 'transcription.txt'
@@ -20,6 +21,7 @@ async def handler_audio(event):
     transcription = transcribe_audio()
     response = await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
 
+@track(name="calling_qa_agent")
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
     sender = await event.get_sender()

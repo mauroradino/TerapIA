@@ -15,6 +15,3 @@ def is_registered(id_val):
         # 3. Aquí capturamos el error si ocurre
         print(f"Error al obtener datos: {e}")
         return None
-
-# Prueba
-print(is_registered("5464564564"))

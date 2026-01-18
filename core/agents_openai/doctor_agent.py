@@ -12,7 +12,3 @@ with open(Path(__file__).parent.parent / 'audio' / 'transcription.txt', "r", enc
     transcription = file.read()
 
 doctor_agent = Agent(name="Doctor Agent", instructions=doctor_prompt, tools=[send_email, send_telegram_message, IDC_codes])
-def generate_report():
-    result = Runner.run_sync(doctor_agent, "Generate a medical report based on the transcription provided. Transcription: " + transcription)
-    print(result.final_output)
-generate_report()      

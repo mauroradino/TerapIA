@@ -14,10 +14,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
+from opik import track
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
+@track(name="send_telegram_message_tool")
 @function_tool
 async def send_telegram_message(message: str) -> str:
     """
