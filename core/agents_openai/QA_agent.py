@@ -6,7 +6,7 @@ from opik.integrations.openai import track_openai
 import openai 
 load_dotenv()
 
-track_openai(openai.OpenAI)
+track_openai(openai.OpenAI())
 
 
 
