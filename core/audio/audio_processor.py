@@ -16,7 +16,7 @@ def transcribe_audio():
         with open("./core/audio/transcription_test.txt", "w", encoding="utf-8") as f:
             f.write(transcription.text)
         
-        return transcription.text
+        return "Transcription completed successfully."
     except Exception as e:
         return f"Error during transcription: {e}"
     
