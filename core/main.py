@@ -1,7 +1,6 @@
 from telethon import events
 import sys
 from pathlib import Path
-from audio.audio_processor import transcribe_audio
 from agents import Runner
 from utils.registered_verification import is_registered
 from utils.set_new_user import set_new_user
@@ -9,6 +8,7 @@ from agents_openai.doctor_agent import doctor_agent
 from agents_openai.QA_agent import QA_agent
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from integrations.telegram_client import bot
+from integrations.supabase_client import update_clinical_history
 transcription_path = Path(__file__).parent/ 'audio' / 'transcription.txt'
 with open(transcription_path, "r", encoding="utf-8") as file:
     transcription = file.read()
@@ -19,6 +19,7 @@ async def handler_audio(event):
     await event.reply("Hi! I hope everything went well at your medical appointment. I'm processing the information and will contact you soon.")
     await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
     await Runner.run(QA_agent, f"Enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
+    update_clinical_history(transcription, str(event.sender_id))
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
