@@ -18,7 +18,7 @@ async def handler_audio(event):
     await event.download_media(file=f"audios/audio_test.ogg")
     await event.reply("Hi! I hope everything went well at your medical appointment. I'm processing the information and will contact you soon.")
     await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
-    await Runner.run(QA_agent, f"Enviale por telegram al usuario un resumen familiar cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
+    await Runner.run(QA_agent, f"Enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
