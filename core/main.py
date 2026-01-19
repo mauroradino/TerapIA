@@ -7,7 +7,6 @@ from utils.registered_verification import is_registered
 from utils.set_new_user import set_new_user
 from agents_openai.doctor_agent import doctor_agent
 from agents_openai.QA_agent import QA_agent
-from opik import track
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from integrations.telegram_client import bot
 transcription_path = Path(__file__).parent/ 'audio' / 'transcription.txt'
