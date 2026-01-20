@@ -35,35 +35,55 @@ async def send_telegram_message(message: str) -> str:
         return "Mensaje enviado con éxito!"
     except Exception as e:
         return f"Error al enviar mensaje: {e}"
+    
+
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from agents import function_tool
+import os
 
 @function_tool
-def send_email(body: str, caution_signs: str, doctor_email:str) -> str:
+def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     """
-    Sends an email using the configured email service.
+    Sends a formal medical report via email using SMTP (Gmail/Outlook).
 
     Args:
-        body (str): The body content of the email.
-        caution_signs (str): The caution signs to include in the email.
-    
-    Returns:
-        str: Confirmation message with email ID or error.
+        body (str): The HTML structured SOAP report.
+        caution_signs (str): HTML list (<ul><li>) of risk factors.
+        doctor_email (str): The recipient's email address.
     """
+    smtp_server = "smtp.gmail.com"
+    smtp_port = 587
+    sender_email = os.getenv("SMTP_EMAIL")
+    sender_password = os.getenv("SMTP_PASSWORD") 
+
+    if not sender_email or not sender_password:
+        return "Error: Credenciales SMTP no configuradas en el entorno."
+
     try:
-        if not resend.api_key:
-            return "Error: RESEND_API_KEY no está configurada"
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "Medical Report - TerapIA"
+        message["From"] = f"TerapIA Assist <{sender_email}>"
+        message["To"] = doctor_email
+
+        from core.templates.email_template import email_template
+        html_content = email_template.format(body=body, caution_signs=caution_signs)
         
-        params = {
-            "from": "onboarding@resend.dev",
-            "to": [doctor_email],
-            "subject": "Medical Report - TerapIA",
-            "html": email_template.format(body=body, caution_signs=caution_signs),
-        }
-        
-        resend.Emails.send(params)
-        return "Email sent successfully."
+        message.attach(MIMEText(html_content, "html"))
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, doctor_email, message.as_string())
+
+        return f"Email enviado con éxito a {doctor_email} vía SMTP."
+
     except Exception as e:
-        return f"Error al enviar email: {str(e)}"
-    
+        return f"Error crítico al enviar email vía SMTP: {str(e)}"
+
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from integrations.telegram_client import bot 
 scheduler = BackgroundScheduler()
