@@ -20,7 +20,7 @@ async def handler_audio(event):
     #Ahora el envio de mail al medico es opcional
     #await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
     #Ahora el envio de mail al medico es opcional
-    await Runner.run(QA_agent, f"Enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
+    await Runner.run(QA_agent, f"Acabas de recibir un audio, enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
     update_clinical_history(transcription, str(event.sender_id))
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))

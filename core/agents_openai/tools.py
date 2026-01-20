@@ -37,7 +37,7 @@ async def send_telegram_message(message: str) -> str:
         return f"Error al enviar mensaje: {e}"
 
 @function_tool
-def send_email(body: str, caution_signs: str) -> str:
+def send_email(body: str, caution_signs: str, doctor_email:str) -> str:
     """
     Sends an email using the configured email service.
 
@@ -54,7 +54,7 @@ def send_email(body: str, caution_signs: str) -> str:
         
         params = {
             "from": "onboarding@resend.dev",
-            "to": ["mauroradino22@gmail.com"],
+            "to": [doctor_email],
             "subject": "Medical Report - TerapIA",
             "html": email_template.format(body=body, caution_signs=caution_signs),
         }
