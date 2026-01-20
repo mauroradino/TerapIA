@@ -1,7 +1,7 @@
-from agents import Agent, set_trace_processors
+from agents import Agent, set_trace_processors, Runner
 from dotenv import load_dotenv
-from agents_openai.prompts import QA_prompt
-from agents_openai.tools import set_reminder, update_user_info, send_telegram_message, send_email
+from prompts import QA_prompt
+from tools import set_reminder, update_user_info, send_telegram_message, send_email
 from opik.integrations.openai.agents import OpikTracingProcessor
 load_dotenv()
 
