@@ -17,7 +17,9 @@ with open(transcription_path, "r", encoding="utf-8") as file:
 async def handler_audio(event):
     await event.download_media(file=f"audios/audio_test.ogg")
     await event.reply("Hi! I hope everything went well at your medical appointment. I'm processing the information and will contact you soon.")
-    await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
+    #Ahora el envio de mail al medico es opcional
+    #await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
+    #Ahora el envio de mail al medico es opcional
     await Runner.run(QA_agent, f"Enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
     update_clinical_history(transcription, str(event.sender_id))
 
