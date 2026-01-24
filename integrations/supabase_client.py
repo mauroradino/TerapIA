@@ -30,3 +30,10 @@ def update_clinical_history(clinical_history: str, telegram_id: str):
     supabase.table(TABLE).update({"clinical_history": current_history}).eq("telegram_id", telegram_id).execute()
 
     return "Clinical history updated successfully."
+
+def save_transcription(text:str, telegram_id:str):
+    try:
+        supabase.table(TABLE).update({"last_transcription": text}).eq("telegram_id", telegram_id).execute()
+        return "Transcription saved successfully."
+    except Exception as e:
+        return f"Error saving transcription: {e}"

@@ -1,38 +1,96 @@
-from telethon import events
 import sys
+import os
 from pathlib import Path
+from telethon import events
+
+# Configuración de rutas
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from integrations.telegram_client import bot
+from integrations.supabase_client import update_clinical_history, save_transcription
 from agents import Runner
+from agents_openai.QA_agent import QA_agent
+from audio.audio_processor import transcribe_audio
 from utils.registered_verification import is_registered
 from utils.set_new_user import set_new_user
-from agents_openai.QA_agent import QA_agent
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from integrations.telegram_client import bot
-from integrations.supabase_client import update_clinical_history
-transcription_path = Path(__file__).parent/ 'audio' / 'transcription.txt'
-with open(transcription_path, "r", encoding="utf-8") as file:
-    transcription = file.read()
+
+conversations = {}
+user_transcriptions = {}
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.voice or e.audio))
 async def handler_audio(event):
-    await event.download_media(file=f"audios/audio_test.ogg")
-    await event.reply("Hi! I hope everything went well at your medical appointment. I'm processing the information and will contact you soon.")
-    #Ahora el envio de mail al medico es opcional
-    #await Runner.run(doctor_agent, f"Generate a medical report based on the transcription provided: {transcription}")
-    #Ahora el envio de mail al medico es opcional
-    await Runner.run(QA_agent, f"Acabas de recibir un audio, enviale por telegram al usuario un resumen amigable cálido y sencillo basado en la siguiente transcripción: {transcription} y este es el id de telegram del usuario: {event.sender_id}")
-    update_clinical_history(transcription, str(event.sender_id))
+    user_id = str(event.sender_id)
+    
+    user_data = is_registered(user_id)
+    if not user_data:
+        set_new_user(user_id)
+        user_data = {"name": "Desconocido", "surname": "", "age": "N/A"}
+
+    await event.respond("🎙️ He recibido tu audio. Estoy procesando la consulta...")
+
+    audio_path = f"audios/audio_{user_id}.ogg"
+    os.makedirs("audios", exist_ok=True)
+    await event.download_media(file=audio_path)
+    
+    transcription = transcribe_audio() 
+    user_transcriptions[user_id] = transcription
+    
+    update_clinical_history(transcription, user_id)
+    save_transcription(transcription, user_id)
+
+    conversations[user_id] = []
+
+    prompt_audio = (
+        f"PROTOCOLO MÉDICO ACTIVADO.\n"
+        f"DATOS DEL PACIENTE ACTUAL: {user_data}\n" 
+        f"TRANSCRIPCIÓN: {transcription}\n"
+        f"TAREA: 1. Saluda formalmente. 2. Valida si en DATOS DEL PACIENTE faltan Nombre, Apellido o Edad. "
+        f"3. Si están completos, envía el resumen estructurado directamente. "
+        f"4. Ofrece enviar mail al médico."
+    )
+
+    response = await Runner.run(QA_agent, prompt_audio)
+    
+    conversations[user_id].append({"role": "assistant", "content": response.final_output})
+    await event.reply(response.final_output)
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
 async def handler_text(event):
-    sender = await event.get_sender()
-    usuario_id = sender.id
-    user_data = is_registered(usuario_id) 
-    if not user_data:
-        set_new_user(str(usuario_id)) 
-        user_data = [{"telegram_id": usuario_id, "name": "", "surname": "", "age": ""}]
+    user_id = str(event.sender_id)
     user_message = event.message.message
-    response = await Runner.run(QA_agent, f"El usuario dice: {user_message}. Esta es la transcripción de la consulta médica: {transcription} y este el id de telegram del usuario: {usuario_id}. La informacion del usuario es: {user_data}")
+
+    user_data = is_registered(user_id)
+    if not user_data:
+        set_new_user(user_id)
+        user_data = {"name": "Desconocido", "surname": "", "age": "N/A"}
+
+    history = conversations.get(user_id, [])
+    last_transcription = user_transcriptions.get(user_id, "No hay transcripciones recientes.")
+
+    prompt_text = (
+        f"CONTEXTO DE LA ÚLTIMA CONSULTA: {last_transcription}\n"
+        f"DATOS DEL PACIENTE: {user_data}\n"
+        f"MENSAJE DEL USUARIO: {user_message}\n"
+        f"HISTORIAL RECIENTE: {history}\n\n"
+        "INSTRUCCIÓN: Responde de forma natural. Si es un saludo, sé breve. "
+        "Si pregunta sobre la consulta, usa el contexto. NO generes el resumen de nuevo "
+        "a menos que el usuario lo pida específicamente."
+    )
+
+    response = await Runner.run(QA_agent, prompt_text)
+
+    if user_id not in conversations:
+        conversations[user_id] = []
+    
+    conversations[user_id].append({"role": "user", "content": user_message})
+    conversations[user_id].append({"role": "assistant", "content": response.final_output})
+
+    if len(conversations[user_id]) > 10:
+        conversations[user_id] = conversations[user_id][-10:]
+
     await event.reply(response.final_output)
 
-print("Bot listening audios...")
-bot.run_until_disconnected()
+
+if __name__ == "__main__":
+    print("🚀 TerapIA Bot está escuchando...")
+    bot.run_until_disconnected()

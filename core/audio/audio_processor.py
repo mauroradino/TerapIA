@@ -1,6 +1,8 @@
 from pathlib import Path
 from openai import OpenAI
 from dotenv import load_dotenv
+from pathlib import Path
+from integrations.supabase_client import save_transcription
 load_dotenv()
 
 client = OpenAI()
@@ -13,10 +15,7 @@ def transcribe_audio():
             model="gpt-4o-transcribe", 
             file=audio_file
         )
-        with open("./core/audio/transcription_test.txt", "w", encoding="utf-8") as f:
-            f.write(transcription.text)
-        
-        return "Transcription completed successfully."
+        return transcription.text
     except Exception as e:
         return f"Error during transcription: {e}"
     
