@@ -5,6 +5,8 @@ __pycache__/
 *.pyc
 core/__pycache__/
 core/agents/__pycache__/
+observability
+core/agents_openai/prompts.py
 
 # IDE y editores
 .vscode/

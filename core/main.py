@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from telethon import events
 
-# Configuración de rutas
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from integrations.telegram_client import bot
@@ -58,13 +57,15 @@ async def handler_audio(event):
 async def handler_text(event):
     user_id = str(event.sender_id)
     user_message = event.message.message
-
+    
     user_data = is_registered(user_id)
+    
     if not user_data:
         set_new_user(user_id)
         user_data = {"name": "Desconocido", "surname": "", "age": "N/A"}
 
     history = conversations.get(user_id, [])
+
     last_transcription = user_transcriptions.get(user_id, "No hay transcripciones recientes.")
 
     prompt_text = (
