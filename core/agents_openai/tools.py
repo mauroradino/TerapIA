@@ -54,7 +54,7 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
         doctor_email (str): The recipient's email address.
     """
     smtp_server = "smtp.gmail.com"
-    smtp_port = 587
+    smtp_port = 465
     sender_email = os.getenv("SMTP_EMAIL")
     sender_password = os.getenv("SMTP_PASSWORD") 
 
