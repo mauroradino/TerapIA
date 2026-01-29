@@ -80,7 +80,9 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
         return f"Email enviado con éxito a {doctor_email} vía SMTP."
 
     except Exception as e:
+        print(f"Error crítico al enviar email vía SMTP: {str(e)}")
         return f"Error crítico al enviar email vía SMTP: {str(e)}"
+    
         
 @function_tool
 async def set_reminder(interval_seconds: int, counter: int, chat_id: str, message_text: str) -> str:

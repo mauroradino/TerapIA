@@ -11,4 +11,4 @@ prompt = client.get_prompt(name="QA_agent_prompt")
 
 set_trace_processors(processors=[OpikTracingProcessor()])
 
-QA_agent = Agent(name="QA Agent", instructions=prompt.prompt, tools=[set_reminder, update_user_info, send_telegram_message, send_email],)
+QA_agent = Agent(name="QA Agent", model="gpt-4o", instructions=prompt.prompt, tools=[set_reminder, update_user_info, send_telegram_message, send_email],)
