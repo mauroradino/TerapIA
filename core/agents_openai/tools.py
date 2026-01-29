@@ -47,7 +47,7 @@ import os
 @function_tool
 def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     # 1. Configuración de puertos para la nube (Paso 2)
-    smtp_server = "smtp.gmail.com"
+    smtp_server = "173.194.76.108"
     smtp_port = 587  # El puerto 587 es el estándar para despliegues en Railway/Render
     sender_email = os.getenv("SMTP_EMAIL")
     sender_password = os.getenv("SMTP_PASSWORD") 
