@@ -36,60 +36,56 @@ async def send_telegram_message(message: str) -> str:
     except Exception as e:
         return f"Error al enviar mensaje: {e}"
     
-
-
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from agents import function_tool
 import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 @function_tool
 def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
-    # 1. Configuración de puertos para la nube (Paso 2)
-    smtp_server = "173.194.76.108"
-    smtp_port = 587  # El puerto 587 es el estándar para despliegues en Railway/Render
-    sender_email = os.getenv("SMTP_EMAIL")
-    sender_password = os.getenv("SMTP_PASSWORD") 
+    """
+    Sends an email using the EmailJS service.
+    Args:
+        body (str): The main content of the email.
+        caution_signs (str): Any caution signs to include.
+        doctor_email (str): The recipient's email address.
+    Returns:
+        str: Confirmation message or error.
+    """
+    service_id = os.getenv("EMAILJS_SERVICE_ID")
+    template_id = os.getenv("EMAILJS_TEMPLATE_ID")
+    public_key = os.getenv("EMAILJS_PUBLIC_KEY")
+    private_key = os.getenv("EMAILJS_PRIVATE_KEY") 
+    if not all([service_id, template_id, public_key]):
+        return "Error: Faltan variables de entorno de EmailJS."
 
-    if not sender_email or not sender_password:
-        return "Error: Credenciales SMTP no configuradas."
+    url = "https://api.emailjs.com/api/v1.0/email/send"
+
+    data = {
+        "service_id": service_id,
+        "template_id": template_id,
+        "accessToken": private_key,
+        "user_id": public_key,
+        "template_params": {
+            "to_email": doctor_email,
+            "body": body,
+            "caution_signs": caution_signs
+        }
+    }
 
     try:
-        # Forzar IPv4 para evitar el error "Network is unreachable" en Railway
-        # (Esto resuelve problemas de ruteo interno del servidor)
-        socket.setdefaulttimeout(30)
+        response = requests.post(url, json=data, timeout=10)
         
-        message = MIMEMultipart("alternative")
-        message["Subject"] = "Medical Report - TerapIA"
-        message["From"] = f"TerapIA Assist <{sender_email}>"
-        message["To"] = doctor_email
-
-        # (Asumo que traes el template aquí)
-        from core.templates.email_template import email_template
-        html_content = email_template.format(body=body, caution_signs=caution_signs)
-        message.attach(MIMEText(html_content, "html"))
-
-        # 2. Conexión compatible con Railway (Paso 2 avanzado)
-        # Usamos SMTP estándar + STARTTLS
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.ehlo()            # Identificarse con el servidor
-        server.starttls()        # Iniciar cifrado (obligatorio en puerto 587)
-        server.ehlo()            # Volver a identificarse sobre conexión cifrada
-        
-        # 3. Autenticación (Paso 3)
-        # IMPORTANTE: sender_password DEBE ser una "Contraseña de Aplicación"
-        server.login(sender_email, sender_password)
-        
-        server.sendmail(sender_email, doctor_email, message.as_string())
-        server.quit()
-
-        return f"Email enviado con éxito a {doctor_email}."
+        if response.status_code == 200:
+            return f"Email enviado con éxito a {doctor_email} vía EmailJS."
+        else:
+            return f"Error de EmailJS ({response.status_code}): {response.text}"
 
     except Exception as e:
-        print(f"Error detallado en Railway: {str(e)}")
+        print(f"Error de conexión con EmailJS: {str(e)}")
         return f"Error crítico al enviar email: {str(e)}"
-    
+
         
 @function_tool
 async def set_reminder(interval_seconds: int, counter: int, chat_id: str, message_text: str) -> str:
