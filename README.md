@@ -1,139 +1,86 @@
-# TerapIA
+# TerapIA: Intelligent Post-Consultation Follow-up
 
-Bot de Telegram que procesa consultas médicas mediante audio, genera resúmenes estructurados y gestiona historiales clínicos utilizando inteligencia artificial.
+TerapIA is an AI-powered medical agent designed to bridge the gap between clinical consultations and patient recovery. By processing medical instructions via voice and text, it generates structured clinical summaries, manages patient history, and ensures treatment adherence through proactive monitoring.
 
-## 🏗️ Arquitectura del Proyecto
+## 🌟 Key Features
 
-El proyecto está organizado en módulos principales:
+- **Voice-to-Clinical Insights:** Transcribes medical audios using specialized models to generate structured summaries (Reasoning, Instructions, Warning Signs).
 
-- **Core**: Contiene la lógica principal del bot, el agente de IA, procesamiento de audio, plantillas y utilidades
-- **Integrations**: Módulos de conexión con servicios externos (Telegram y base de datos)
-- **Observability**: Herramientas para monitoreo, evaluación y optimización del sistema
-- **Audios**: Directorio donde se almacenan temporalmente los archivos de audio recibidos
+- **Context-Aware Follow-up:** Maintains long-term memory of patient history and recent interactions to provide personalized support without redundancy.
 
-## 🔄 Flujo de Funcionamiento
+- **Proactive Care Agent:** An autonomous agent capable of scheduling reminders, updating patient records, and detecting clinical "red flags".
 
-### Procesamiento de Consultas Médicas por Audio
+- **Professional Integration:** Seamlessly exports structured medical reports to healthcare professionals via email.
 
-Cuando un usuario envía un audio:
+- **Observability-Driven:** Integrated tracing and evaluation to ensure the highest quality of medical responses.
 
-1. El sistema verifica si el usuario está registrado en la base de datos. Si no existe, crea un nuevo registro automáticamente.
-2. El audio se descarga y se almacena temporalmente en el sistema.
-3. El audio se transcribe a texto utilizando un modelo de reconocimiento de voz.
-4. La transcripción se guarda en el historial clínico del paciente y se almacena como la última consulta procesada.
-5. Se construye un contexto con los datos del paciente y la transcripción de la consulta.
-6. El agente de IA procesa esta información y genera un resumen estructurado que incluye:
-   - Motivo de consulta
-   - Indicaciones médicas
-   - Pautas de alarma
-7. El resumen se envía al usuario y se ofrece la opción de enviarlo al médico tratante.
+## 🏗️ System Architecture
 
-### Procesamiento de Mensajes de Texto
+The project follows a modular, scalable architecture:
 
-Cuando un usuario envía un mensaje de texto:
+- **Core Engine:** Orchestrates the AI agent logic, audio processing pipelines, and prompt engineering.
 
-1. Se verifica la identidad del usuario de la misma manera que en el flujo de audio.
-2. Se construye un contexto que incluye:
-   - La última consulta médica procesada (si existe)
-   - Los datos del paciente
-   - El mensaje actual
-   - El historial reciente de la conversación
-3. El agente responde de forma contextual, manteniendo la conversación natural sin repetir información ya proporcionada.
-4. Se actualiza el historial de conversación para mantener el contexto en futuras interacciones.
+- **Integrations:** Asynchronous connectors for Telegram (Telethon) and Persistent Storage (Supabase/PostgreSQL).
 
-## 🧩 Componentes Principales
+- **Observability Stack:** Real-time monitoring and evaluation via Opik to track agent traces and response quality.
 
-### Módulo Principal
+- **Data Layer:** Dual-level management combining transient session memory with permanent clinical record persistence.
 
-Gestiona la comunicación con Telegram y coordina todos los procesos. Maneja dos tipos de eventos: mensajes de audio y mensajes de texto. Mantiene en memoria el historial de conversaciones recientes y las últimas transcripciones procesadas para cada usuario.
+## 🔄 How It Works
 
-### Agente de Inteligencia Artificial
+1. **Medical Audio Processing**
 
-Sistema de IA que procesa las consultas médicas y genera respuestas estructuradas. Utiliza un modelo de lenguaje avanzado y tiene acceso a herramientas especializadas que le permiten:
+   - **Identity Verification:** Automatic patient registration or retrieval from the database.
 
-- Programar recordatorios médicos personalizados
-- Actualizar información del paciente
-- Enviar mensajes por Telegram
-- Enviar informes médicos por email
-- Consultar códigos de clasificación médica
+   - **Medical Transcription:** Audio is processed by a high-precision speech-to-text model specialized in technical medical jargon.
 
-El agente opera con instrucciones específicas para evitar procesamiento innecesario y mantener un flujo de conversación natural.
+   - **Structured Analysis:** The AI agent analyzes the transcript to extract:
+     - **Clinical Summary:** Key points of the consultation.
+     - **Instructions & Treatment:** Clear, actionable steps for the patient.
+     - **Warning Signs:** Specific symptoms that require immediate medical attention.
 
-### Procesador de Audio
+   - **Closing the Loop:** The patient receives the summary and can opt to send a formal report to their doctor.
 
-Convierte los archivos de audio recibidos en texto mediante reconocimiento de voz. Utiliza un modelo especializado en transcripción médica para garantizar precisión en términos técnicos.
+2. **Conversational Support**
 
-### Gestión de Base de Datos
+   - The agent utilizes the latest medical transcript and conversation history as context.
 
-Módulo responsable de almacenar y recuperar información de pacientes:
+   - It provides natural language answers to patient doubts regarding their specific treatment.
 
-- **Información del usuario**: Datos personales básicos (nombre, apellido, edad)
-- **Historial clínico**: Registro completo de todas las consultas médicas con sus fechas
-- **Última transcripción**: Referencia rápida a la consulta más reciente
+   - Updates patient data or schedules reminders in real-time as the conversation evolves.
 
-### Utilidades de Usuario
+## 🧩 Agentic Capabilities (Tool Use)
 
-Sistema que verifica si un usuario está registrado en el sistema y crea nuevos registros automáticamente cuando un usuario interactúa por primera vez con el bot.
+The agent is equipped with a specialized toolkit to perform autonomous actions:
 
-### Herramientas del Agente
+- **Reminders:** Schedules automatic notifications for medication or appointments.
 
-Conjunto de capacidades que el agente puede utilizar para realizar acciones:
+- **Reporting:** Generates and dispatches professional clinical emails.
 
-- **Envío de emails**: Permite enviar informes médicos estructurados al médico tratante
-- **Mensajería**: Envía mensajes directos por Telegram
-- **Recordatorios**: Programa notificaciones automáticas para el paciente
-- **Actualización de datos**: Modifica información del paciente en la base de datos
-- **Consulta de códigos médicos**: Obtiene códigos de clasificación internacional de enfermedades
+- **Data Management:** Updates patient clinical records directly in the database.
 
-## 🔌 Integraciones
+- **Clinical Coding:** Accesses international disease classification codes for accurate reporting.
 
-### Telegram
+## 🛠️ Tech Stack
 
-Plataforma de mensajería donde opera el bot. El sistema se conecta mediante un cliente asíncrono que permite recibir mensajes en tiempo real y responder a los usuarios.
+- **Language:** Python (Asynchronous).
 
-### Base de Datos
+- **AI Orchestration:** OpenAI SDK & Agentic Frameworks.
 
-Sistema de almacenamiento persistente que guarda toda la información de los pacientes, incluyendo sus historiales clínicos completos. Utiliza una estructura que permite almacenar múltiples consultas por paciente con sus respectivas fechas.
+- **Communication:** Telethon (Telegram API).
 
-### Servicios de IA
+- **Database:** Supabase / PostgreSQL.
 
-Proveedor de modelos de inteligencia artificial que se utilizan para:
-- Procesar y entender las consultas médicas
-- Generar respuestas estructuradas
-- Transcribir audio a texto
+- **Observability:** Opik (Comet).
 
-### Sistema de Observabilidad
+- **Email:** Professional SMTP services.
 
-Plataforma que permite monitorear el funcionamiento del agente, almacenar las interacciones y optimizar el rendimiento del sistema mediante análisis de datos.
+## 🚀 Future Roadmap: "Compliance-First"
 
-### Servicio de Email
+To transition from a prototype to a certified Medical Device, TerapIA is moving toward:
 
-Sistema externo que permite enviar emails estructurados a médicos tratantes con la información de las consultas procesadas.
+- **HIPAA Compliance:** Implementing medical-grade security protocols and access audits.
 
-## 🛠️ Tecnologías Utilizadas
+- **Bunker Infrastructure:** Migration to Microsoft Azure OpenAI Service for private environments and Business Associate Agreement (BAA) support.
 
-- **Python**: Lenguaje de programación principal
-- **Cliente de Telegram**: Biblioteca para comunicación asíncrona con Telegram
-- **Framework de Agentes**: Sistema para crear agentes de IA con capacidades de herramientas
-- **API de IA**: Servicios de modelos de lenguaje y transcripción de voz
-- **Base de Datos**: Sistema de almacenamiento de datos relacional
-- **Observabilidad**: Herramientas para monitoreo y análisis
-- **Servicios de Email**: Plataformas para envío de correos electrónicos
-
-## 📊 Gestión de Estado
-
-El sistema maneja información en dos niveles:
-
-1. **Memoria Temporal**: Almacena datos que se necesitan durante la sesión activa, como el historial reciente de conversación y las últimas transcripciones procesadas. Esta información se mantiene solo mientras el sistema está en ejecución.
-
-2. **Persistencia Permanente**: Almacena en la base de datos toda la información que debe perdurar, incluyendo los datos del paciente, el historial clínico completo y las transcripciones de todas las consultas.
-
-## 🔄 Lógica del Agente
-
-El agente de IA opera de manera inteligente según el contexto:
-
-- **Modo Consulta Médica**: Se activa cuando se recibe un audio nuevo. Valida la información del paciente, procesa la consulta y genera un resumen médico estructurado. Ofrece enviar el informe al médico tratante.
-
-- **Modo Conversación**: Se activa cuando se recibe un mensaje de texto. Responde de forma natural y contextual, utilizando la información de consultas previas cuando es relevante, pero sin repetir resúmenes ya proporcionados.
-
-El sistema está diseñado para evitar procesamiento redundante y mantener conversaciones fluidas, activándose solo cuando hay nueva información que procesar o cuando el usuario solicita algo específico.
+- **Native App:** Transitioning to a dedicated mobile application for total data sovereignty and biometric security.

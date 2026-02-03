@@ -104,18 +104,20 @@ async def set_reminder(interval_seconds: int, counter: int, chat_id: str, messag
         try:
             if not bot.is_connected():
                 await bot.connect()
+
+            target = chat_id
             if isinstance(chat_id, str):
                 clean_id = chat_id.strip()
-                if clean_id.replace('-', '').isdigit():
+                if clean_id.lstrip('-').isdigit():
                     target = int(clean_id)
                 else:
                     target = clean_id  
-            else:
-                target = chat_id
-
+            
+            entity = await bot.get_input_entity(target)
             while count < counter:
                 await asyncio.sleep(interval_seconds)
-                await bot.send_message(target, message=message_text)
+                # Usar la entidad resuelta
+                await bot.send_message(entity, message=message_text)
                 count += 1
         except asyncio.CancelledError:
             print(f"⚠️ Tarea de recordatorio para {chat_id} cancelada.")
