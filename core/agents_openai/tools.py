@@ -32,9 +32,9 @@ async def send_telegram_message(message: str) -> str:
     """
     try:
         await bot.send_message("mauroradino", message)
-        return "Mensaje enviado con éxito!"
+        return "Message sent successfully"
     except Exception as e:
-        return f"Error al enviar mensaje: {e}"
+        return f"Error sending message: {e}"
     
 import os
 import requests
@@ -58,7 +58,7 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     public_key = os.getenv("EMAILJS_PUBLIC_KEY")
     private_key = os.getenv("EMAILJS_PRIVATE_KEY") 
     if not all([service_id, template_id, public_key]):
-        return "Error: Faltan variables de entorno de EmailJS."
+        return "Error: Missing EmailJS environment variables."
 
     url = "https://api.emailjs.com/api/v1.0/email/send"
 
@@ -78,25 +78,25 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
         response = requests.post(url, json=data, timeout=10)
         
         if response.status_code == 200:
-            return f"Email enviado con éxito a {doctor_email} vía EmailJS."
+            return f"Email sent successfully to {doctor_email} via EmailJS."
         else:
-            return f"Error de EmailJS ({response.status_code}): {response.text}"
+            return f"EmailJS error ({response.status_code}): {response.text}"
 
     except Exception as e:
-        print(f"Error de conexión con EmailJS: {str(e)}")
-        return f"Error crítico al enviar email: {str(e)}"
+        print(f"Error connecting to EmailJS: {str(e)}")
+        return f"Critical error while sending email: {str(e)}"
 
         
 @function_tool
 async def set_reminder(interval_seconds: int, counter: int, chat_id: str, message_text: str) -> str:
     """
-    Programa recordatorios para enviar mensajes en intervalos específicos.
+    Schedule reminders to send messages at specific intervals.
     
     Args:
-        interval_seconds (int): Segundos entre cada mensaje.
-        counter (int): Cantidad total de mensajes a enviar.
-        chat_id (str): ID del chat o Username del usuario.
-        message_text (str): El contenido del recordatorio.
+        interval_seconds (int): Seconds between each message.
+        counter (int): Total number of messages to send.
+        chat_id (str): The chat ID or username of the user.
+        message_text (str): The content of the reminder message.
     """
     
     async def background_task():
@@ -120,13 +120,13 @@ async def set_reminder(interval_seconds: int, counter: int, chat_id: str, messag
                 await bot.send_message(entity, message=message_text)
                 count += 1
         except asyncio.CancelledError:
-            print(f"⚠️ Tarea de recordatorio para {chat_id} cancelada.")
+            print(f"⚠️ Reminder task for {chat_id} cancelled.")
         except Exception as e:
-            print(f"❌ Error crítico en recordatorio: {e}")
+            print(f"❌ Critical error in reminder: {e}")
 
     asyncio.create_task(background_task())
     
-    return f"Perfecto. He programado {counter} recordatorios cada {interval_seconds} segundos."
+    return f"I've scheduled {counter} reminders every {interval_seconds} seconds."
 
 
 
@@ -145,12 +145,12 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
         res = supabase.table("Users").update({key: value}).eq("telegram_id", telegram_id).execute()
         
         if len(res.data) > 0:
-            return f"Éxito: Se actualizó {key} a '{value}'."
+            return f"Success: Updated {key} to '{value}'."
         else:
-            return "Aviso: No se encontró ningún usuario con ese ID para actualizar."
+            return "Warning: No user found with that ID to update."
 
     except Exception as e:
-        return f"Error crítico: {str(e)}"
+        return f"Critical error: {str(e)}"
     
 
 @function_tool

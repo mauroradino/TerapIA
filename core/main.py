@@ -23,9 +23,9 @@ async def handler_audio(event):
     user_data = is_registered(user_id)
     if not user_data:
         set_new_user(user_id)
-        user_data = {"name": "Desconocido", "surname": "", "age": "N/A"}
+        user_data = {"name": "Unknown", "surname": "", "age": ""}
 
-    await event.respond("🎙️ He recibido tu audio. Estoy procesando la consulta...")
+    await event.respond("🎙️ I've received your audio. I'm processing your consultation")
 
     audio_path = f"audios/audio_{user_id}.ogg"
     os.makedirs("audios", exist_ok=True)
@@ -40,12 +40,12 @@ async def handler_audio(event):
     conversations[user_id] = []
 
     prompt_audio = (
-        f"PROTOCOLO MÉDICO ACTIVADO.\n"
-        f"DATOS DEL PACIENTE ACTUAL: {user_data}\n" 
-        f"TRANSCRIPCIÓN: {transcription}\n"
-        f"TAREA: 1. Saluda formalmente. 2. Valida si en DATOS DEL PACIENTE faltan Nombre, Apellido o Edad. "
-        f"3. Si están completos, envía el resumen estructurado directamente. "
-        f"4. Ofrece enviar mail al médico."
+        f"MEDICAL PROTOCOL ACTIVATED\n"
+        f"CURRENT PATIENT DATA: {user_data}\n" 
+        f"TRANSCRIPTION: {transcription}\n"
+        f"TASK: 1. Greet formally 2. Check if the PATIENT DATA is missing Name, Surname or Age."
+        f"3. If they are complete, send the structured summary directly. "
+        f"4. Offer to send an email to the doctor."
     )
 
     response = await Runner.run(QA_agent, prompt_audio)
@@ -62,20 +62,20 @@ async def handler_text(event):
     
     if not user_data:
         set_new_user(user_id)
-        user_data = {"name": "Desconocido", "surname": "", "age": "N/A"}
+        user_data = {"name": "Unknown", "surname": "", "age": ""}
 
     history = conversations.get(user_id, [])
 
-    last_transcription = user_transcriptions.get(user_id, "No hay transcripciones recientes.")
+    last_transcription = user_transcriptions.get(user_id, "There are no recent transcripts.")
 
     prompt_text = (
-        f"CONTEXTO DE LA ÚLTIMA CONSULTA: {last_transcription}\n"
-        f"DATOS DEL PACIENTE: {user_data}\n"
-        f"MENSAJE DEL USUARIO: {user_message}\n"
-        f"HISTORIAL RECIENTE: {history}\n\n"
-        "INSTRUCCIÓN: Responde de forma natural. Si es un saludo, sé breve. "
-        "Si pregunta sobre la consulta, usa el contexto. NO generes el resumen de nuevo "
-        "a menos que el usuario lo pida específicamente."
+        f"CONTEXT OF THE LAST CONSULTATION: {last_transcription}\n"
+        f"CURRENT PATIENT DATA: {user_data}\n"
+        f"USER MESSAGE: {user_message}\n"
+        f"RECENT HISTORY: {history}\n\n"
+        "INSTRUCTION: Respond naturally. If it's a greeting, be brief. "
+        "If the user asks about the consultation, use the context. DO NOT generate a new summary "
+        "unless the user specifically requests it."
     )
 
     response = await Runner.run(QA_agent, prompt_text)
@@ -93,5 +93,5 @@ async def handler_text(event):
 
 
 if __name__ == "__main__":
-    print("🚀 TerapIA Bot está escuchando...")
+    print("🚀 TerapIA Bot is listening...")
     bot.run_until_disconnected()
