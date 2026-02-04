@@ -4,7 +4,7 @@ from pathlib import Path
 from telethon import events
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
+import opik
 from integrations.telegram_client import bot
 from integrations.supabase_client import update_clinical_history, save_transcription
 from agents import Runner
@@ -15,8 +15,8 @@ from utils.set_new_user import set_new_user
 
 conversations = {}
 user_transcriptions = {}
-
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.voice or e.audio))
+@opik.track("handler_audio")
 async def handler_audio(event):
     user_id = str(event.sender_id)
     
