@@ -54,6 +54,7 @@ async def handler_audio(event):
     await event.reply(response.final_output)
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
+@opik.track("handler_text")
 async def handler_text(event):
     user_id = str(event.sender_id)
     user_message = event.message.message
