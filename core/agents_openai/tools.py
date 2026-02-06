@@ -4,22 +4,23 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 import sys
-import socket
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.telegram_client import bot
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from templates.email_template import email_template
-from datetime import datetime, timedelta
 import asyncio
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
+import opik
+
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 @function_tool
+@opik.track("send_telegram_message_tool")
 async def send_telegram_message(message: str) -> str:
     """
     Sends a Telegram message to the specified recipient.
@@ -36,13 +37,12 @@ async def send_telegram_message(message: str) -> str:
     except Exception as e:
         return f"Error sending message: {e}"
     
-import os
-import requests
-from dotenv import load_dotenv
+
 
 load_dotenv()
 
 @function_tool
+@opik.track("send_email_tool")
 def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     """
     Sends an email using the EmailJS service.
@@ -88,6 +88,7 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
 
         
 @function_tool
+@opik.track("set_reminder_tool")
 async def set_reminder(interval_seconds: int, counter: int, chat_id: str, message_text: str) -> str:
     """
     Schedule reminders to send messages at specific intervals.
@@ -131,6 +132,7 @@ async def set_reminder(interval_seconds: int, counter: int, chat_id: str, messag
 
 
 @function_tool
+@opik.track("update_user_info_tool")
 def update_user_info(key: str, value: str, telegram_id: str) -> str:
     """
     Updates user information in the database.
@@ -154,6 +156,7 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
     
 
 @function_tool
+@opik.track("IDC_codes_tool")
 def IDC_codes(disease: str):
     """
     Provides ICD codes for a given disease.

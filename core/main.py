@@ -65,7 +65,7 @@ async def handler_text(event):
         set_new_user(user_id)
         user_data = {"name": "Unknown", "surname": "", "age": ""}
 
-    history = conversations.get(user_id, [])
+    history = conversations.get(user_id, [])[-3:]
 
     last_transcription = user_transcriptions.get(user_id, "There are no recent transcripts.")
 
