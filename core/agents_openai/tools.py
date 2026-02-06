@@ -13,14 +13,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
-import opik
+from ..utils.utils import verify_email
 
 load_dotenv()
 
 resend.api_key = os.getenv("RESEND_API_KEY")
 
 @function_tool
-@opik.track("send_telegram_message_tool")
 async def send_telegram_message(message: str) -> str:
     """
     Sends a Telegram message to the specified recipient.
@@ -42,7 +41,6 @@ async def send_telegram_message(message: str) -> str:
 load_dotenv()
 
 @function_tool
-@opik.track("send_email_tool")
 def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     """
     Sends an email using the EmailJS service.
@@ -75,20 +73,20 @@ def send_email(body: str, caution_signs: str, doctor_email: str) -> str:
     }
 
     try:
-        response = requests.post(url, json=data, timeout=10)
-        
-        if response.status_code == 200:
-            return f"Email sent successfully to {doctor_email} via EmailJS."
-        else:
-            return f"EmailJS error ({response.status_code}): {response.text}"
-
+        if verify_email(doctor_email):
+            response = requests.post(url, json=data, timeout=10)
+            if response.status_code == 200:
+                return f"Email sent successfully to {doctor_email} via EmailJS."
+            else:
+                return f"EmailJS error ({response.status_code}): {response.text}"
+        else: 
+            return f"Invalid email address: {doctor_email}"
     except Exception as e:
         print(f"Error connecting to EmailJS: {str(e)}")
         return f"Critical error while sending email: {str(e)}"
 
         
 @function_tool
-@opik.track("set_reminder_tool")
 async def set_reminder(interval_seconds: int, counter: int, chat_id: str, message_text: str) -> str:
     """
     Schedule reminders to send messages at specific intervals.
@@ -117,7 +115,6 @@ async def set_reminder(interval_seconds: int, counter: int, chat_id: str, messag
             entity = await bot.get_input_entity(target)
             while count < counter:
                 await asyncio.sleep(interval_seconds)
-                # Usar la entidad resuelta
                 await bot.send_message(entity, message=message_text)
                 count += 1
         except asyncio.CancelledError:
@@ -132,7 +129,6 @@ async def set_reminder(interval_seconds: int, counter: int, chat_id: str, messag
 
 
 @function_tool
-@opik.track("update_user_info_tool")
 def update_user_info(key: str, value: str, telegram_id: str) -> str:
     """
     Updates user information in the database.
@@ -156,7 +152,6 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
     
 
 @function_tool
-@opik.track("IDC_codes_tool")
 def IDC_codes(disease: str):
     """
     Provides ICD codes for a given disease.
