@@ -235,3 +235,36 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
             return "Warning: Patient not found to confirm emergency contact."
     except Exception as e:
         return f"Error confirming emergency contact: {str(e)}"
+
+@function_tool
+async def send_emergency_message(patient_telegram_id: str, message: str) -> str:
+    """
+    Sends an emergency message to the patient's emergency contact.
+    Verifies that emergency_contact_state is True before sending.
+    
+    Args:
+        patient_telegram_id (str): The Telegram ID of the patient.
+        message (str): The emergency message content to send to the contact.
+    Returns:
+        str: Confirmation message or error.
+    """
+    try:
+        res = supabase.table("Users").select("emergency_contact_state, emergency_contact").eq("telegram_id", patient_telegram_id).execute()
+        
+        if not res.data or len(res.data) == 0:
+            return "Error: Patient not found."
+        
+        patient = res.data[0]
+        emergency_contact_state = patient.get("emergency_contact_state", False)
+        emergency_contact = patient.get("emergency_contact", {})
+        if not emergency_contact_state:
+            return "Error: Patient's emergency_contact_state is not enabled. Cannot send emergency message."
+        
+        contact_telegram_id = emergency_contact.get("telegram_id")
+        if not contact_telegram_id:
+            return "Error: No emergency contact telegram_id found for this patient."
+        
+        await bot.send_message(contact_telegram_id, message)
+        return "Emergency message sent successfully to the emergency contact."
+    except Exception as e:
+        return f"Error sending emergency message: {str(e)}"
