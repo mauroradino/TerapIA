@@ -1,9 +1,5 @@
 from ..allowed_domains import allowed_domains
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from integrations.supabase_client import supabase
-
+from ...integrations.supabase_client import supabase
 
 def verify_email(email: str) -> bool:
     if "@" not in email:
