@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
 from core.utils.utils import verify_email
+import json
 
 load_dotenv()
 
@@ -159,13 +160,16 @@ def IDC_codes(disease: str):
     res = requests.get(f"https://clinicaltables.nlm.nih.gov/api/icd11_codes/v3/search?terms={disease}")
     if res.status_code == 200:
         data = res.json()
-        return data[3]
+        try:
+            return json.dumps(data[3])
+        except Exception:
+            return json.dumps(data)
     else:
         return "Error retrieving ICD codes."
 
 
 @function_tool
-def search_emergency_contacts(contact_info: dict):
+def search_emergency_contacts(contact_info: str) -> str:
     """
     Searches for emergency contacts based on provided information.
     
@@ -175,9 +179,11 @@ def search_emergency_contacts(contact_info: dict):
         str: Search results or error message.
     """
     try:
-        res = supabase.table("Users").select("*").eq("emergency_contact", contact_info).execute()
+        # Accept JSON string for strict schema compatibility
+        contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
+        res = supabase.table("Users").select("*").eq("emergency_contact", contact).execute()
         if res.data:
-            return res.data
+            return json.dumps(res.data)
         else:
             return "No matching emergency contacts found."
     except Exception as e:
