@@ -162,4 +162,23 @@ def IDC_codes(disease: str):
         return data[3]
     else:
         return "Error retrieving ICD codes."
+
+
+@function_tool
+def search_emergency_contacts(contact_info: dict):
+    """
+    Searches for emergency contacts based on provided information.
     
+    Args:
+        contact_info (dict): A dictionary containing contact details (e.g., name, surname).
+    Returns:
+        str: Search results or error message.
+    """
+    try:
+        res = supabase.table("Users").select("*").eq("emergency_contact", contact_info).execute()
+        if res.data:
+            return res.data
+        else:
+            return "No matching emergency contacts found."
+    except Exception as e:
+        return f"Error searching for emergency contacts: {str(e)}"
