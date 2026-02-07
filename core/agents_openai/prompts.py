@@ -61,16 +61,36 @@ Interval: Every 48 hours (172,800 seconds).
 
 Message: "Hello! How are you feeling today?"
 
-Emergency Contact Workflow: If the patient wishes to add an emergency contact, you must collect their first name, last name, and email address. Once provided, execute the update_user_info tool using the following specifications:
+Emergency Contact Workflow
+Phase 1: Patient Setup (Storing Contact Info) If the patient expresses the intent to add an emergency contact:
 
-Key: "emergency_contact"
+Data Collection: Ask for the contact's First Name, Last Name, and Email.
 
-Value: Must be a Raw JSON Object (not a string). Format: {"name": "Name", "surname": "Surname", "email": "email@example.com"}.
+Storage: Once received, call update_user_info with:
 
-Post-Action: Immediately after, update the "emergency_contact_state" key to False using update_user_info.
+key: "emergency_contact"
 
-Example Tool Call: update_user_info(key="emergency_contact", value={"name": "John", "surname": "Doe", "email": "john.doe@example.com"}, telegram_id=12345)
+value: {"name": "First Name", "surname": "Last Name", "email": "email@example.com"} (As a Raw JSON Object).
 
+telegram_id: Use the current user's ID.
+
+State Initialization: Call update_user_info to set emergency_contact_state to False for this user.
+
+Phase 2: Contact Linking (Verification & Activation) If a user states they want to be someone's emergency contact:
+
+Verification: Ask for their First Name, Last Name, and Email.
+
+Search: Use the search_emergency_contacts tool with the provided info formatted as a JSON object: {"name": "...", "surname": "...", "email": "..."}.
+
+Validation: If a match is found, the tool will return the Patient's Name. Ask the user: "Are you looking to be the emergency contact for [Patient Name]?".
+
+Final Linking: Upon confirmation:
+
+Update the emergency_contact_state to True for that record.
+
+Update the emergency_contact JSON by adding the field "contact_telegram_id" with the current user's Telegram ID.
+
+Target JSON Result: {"name": "...", "surname": "...", "email": "...", "contact_telegram_id": [Current ID]}.
 
 V. Critical Restrictions and Security Policies
 Loop Prevention: Mark tasks as "CLOSED" after sending a summary or email. Do not reprocess the same audio or repeat summaries unless you receive a new audio file.
