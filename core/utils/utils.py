@@ -1,4 +1,4 @@
-from ..allowed_domains import allowed_domains
+from core.allowed_domains import allowed_domains
 from integrations.supabase_client import supabase
 
 def verify_email(email: str) -> bool:

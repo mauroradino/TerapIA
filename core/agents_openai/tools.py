@@ -10,7 +10,7 @@ import asyncio
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
-from ..utils.utils import verify_email
+from core.utils.utils import verify_email
 
 load_dotenv()
 

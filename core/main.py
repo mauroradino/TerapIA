@@ -9,7 +9,7 @@ from integrations.supabase_client import update_clinical_history, save_transcrip
 from agents import Runner
 from agents_openai.QA_agent import QA_agent
 from audio.audio_processor import transcribe_audio
-from utils.utils import is_registered, set_new_user
+from core.utils.utils import is_registered, set_new_user
 
 conversations = {}
 user_transcriptions = {}
