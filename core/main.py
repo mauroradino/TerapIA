@@ -2,7 +2,6 @@ import sys
 import os
 from pathlib import Path
 from telethon import events
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import opik
 from integrations.telegram_client import bot
@@ -10,8 +9,7 @@ from integrations.supabase_client import update_clinical_history, save_transcrip
 from agents import Runner
 from agents_openai.QA_agent import QA_agent
 from audio.audio_processor import transcribe_audio
-from utils.registered_verification import is_registered
-from utils.set_new_user import set_new_user
+from utils.utils import is_registered, set_new_user
 
 conversations = {}
 user_transcriptions = {}

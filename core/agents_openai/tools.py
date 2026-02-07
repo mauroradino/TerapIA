@@ -1,5 +1,4 @@
 from agents import function_tool
-import resend
 import os 
 from dotenv import load_dotenv
 from pathlib import Path
@@ -7,17 +6,13 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.telegram_client import bot
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from templates.email_template import email_template
 import asyncio
-from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.supabase_client import supabase
 import requests
 from ..utils.utils import verify_email
 
 load_dotenv()
-
-resend.api_key = os.getenv("RESEND_API_KEY")
 
 @function_tool
 async def send_telegram_message(message: str) -> str:
@@ -166,4 +161,5 @@ def IDC_codes(disease: str):
         data = res.json()
         return data[3]
     else:
-        return "Error al obtener los códigos IDC."
+        return "Error retrieving ICD codes."
+    
