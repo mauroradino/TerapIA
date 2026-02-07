@@ -167,20 +167,21 @@ def IDC_codes(disease: str):
     else:
         return "Error retrieving ICD codes."
 
-
 @function_tool
 def search_emergency_contacts(contact_info: str) -> str:
     """
     Searches for emergency contacts based on provided information.
     
     Args:
-        contact_info (dict): A dictionary containing contact details (e.g., name, surname).
+        contact_info (str): A JSON string containing contact details: {"name": "...", "surname": "...", "email": "..."}
     Returns:
-        str: Search results or error message.
+        str: JSON list of matching users or error message.
     """
     try:
         contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
-        res = supabase.table("Users").select("*").eq("emergency_contact", contact).execute()
+        
+        res = supabase.table("Users").select("name, surname, telegram_id").contains("emergency_contact", contact).execute()
+        
         if res.data:
             return json.dumps(res.data)
         else:
