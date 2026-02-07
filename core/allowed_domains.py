@@ -25,5 +25,7 @@ allowed_domains = [
     "einstein.br",         # Hospital Albert Einstein (Brasil)
     "mayo.edu",            # Mayo Clinic
     "ccf.org",             # Cleveland Clinic
-    "jhmi.edu"             # Johns Hopkins
+    "jhmi.edu",             # Johns Hopkins
+
+    "gmail.com"
 ]
