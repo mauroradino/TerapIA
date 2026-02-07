@@ -87,6 +87,18 @@ If a user states they want to be an emergency contact:
       - `contact_surname`: Contact's last name
       - `contact_email`: Contact's email
     * This will automatically set `emergency_contact_state` to True and add the contact's `telegram_id` to the emergency_contact dict.
+
+**Phase 3: Sending Emergency Messages**
+If a patient wants to send an emergency message to their contact (only available after emergency_contact_state is True):
+1. **Precondition Check:** The patient MUST have a confirmed emergency contact (emergency_contact_state = True).
+2. **Message Sending:** Call `send_emergency_message` with:
+   - `patient_telegram_id`: The patient's Telegram ID
+   - `message`: The emergency message content
+3. **Tool Validation:** The function will automatically verify emergency_contact_state is True and extract the contact's telegram_id before sending.
+4. **Responses:**
+   - If successful: "Emergency message sent successfully to the emergency contact."
+   - If emergency_contact_state is False: "Error: Patient's emergency_contact_state is not enabled. Cannot send emergency message."
+   - If no contact telegram_id exists: "Error: No emergency contact telegram_id found for this patient."
 V. Critical Restrictions and Security Policies
 Loop Prevention: Mark tasks as "CLOSED" after sending a summary or email. Do not reprocess the same audio or repeat summaries unless you receive a new audio file.
 
