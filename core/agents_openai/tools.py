@@ -130,16 +130,26 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
     Updates user information in the database.
     Args:
         key (str): The field to update.
-        value (str): The new value for the field.
+        value (str): The new value for the field (can be JSON string for emergency_contact).
         telegram_id (str): The Telegram ID of the user.
         Returns:
         str: Confirmation message or error.
     """
     try:
-        res = supabase.table("Users").update({key: value}).eq("telegram_id", telegram_id).execute()
+        # If updating emergency_contact, parse JSON string to object
+        if key == "emergency_contact":
+            try:
+                update_value = json.loads(value) if isinstance(value, str) else value
+            except Exception:
+                return "Error: emergency_contact value must be a valid JSON string or dict."
+            payload = {key: update_value}
+        else:
+            payload = {key: value}
         
-        if len(res.data) > 0:
-            return f"Success: Updated {key} to '{value}'."
+        res = supabase.table("Users").update(payload).eq("telegram_id", telegram_id).execute()
+        
+        if res.data and len(res.data) > 0:
+            return f"Success: Updated {key}."
         else:
             return "Warning: No user found with that ID to update."
 
@@ -188,3 +198,40 @@ def search_emergency_contacts(contact_info: str) -> str:
             return "No matching emergency contacts found."
     except Exception as e:
         return f"Error searching for emergency contacts: {str(e)}"
+
+
+@function_tool
+def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str, contact_name: str, contact_surname: str, contact_email: str) -> str:
+    """
+    Confirms and finalizes the emergency contact linking for a patient.
+    Updates the patient's emergency_contact dict to include the contact's telegram_id and sets emergency_contact_state to True.
+    
+    Args:
+        patient_telegram_id (str): The Telegram ID of the patient.
+        contact_telegram_id (str): The Telegram ID of the emergency contact person.
+        contact_name (str): First name of the emergency contact.
+        contact_surname (str): Last name of the emergency contact.
+        contact_email (str): Email of the emergency contact.
+    Returns:
+        str: Confirmation message or error.
+    """
+    try:
+        # Build the updated emergency_contact object with telegram_id included
+        contact_obj = {
+            "name": contact_name,
+            "surname": contact_surname,
+            "email": contact_email,
+            "telegram_id": contact_telegram_id
+        }
+        
+        res = supabase.table("Users").update({
+            "emergency_contact": contact_obj,
+            "emergency_contact_state": True
+        }).eq("telegram_id", patient_telegram_id).execute()
+        
+        if res.data and len(res.data) > 0:
+            return "Emergency contact confirmed and linked successfully. emergency_contact_state is now True."
+        else:
+            return "Warning: Patient not found to confirm emergency contact."
+    except Exception as e:
+        return f"Error confirming emergency contact: {str(e)}"

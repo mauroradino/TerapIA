@@ -5,6 +5,8 @@ from core.agents_openai.tools import (
     update_user_info,
     send_telegram_message,
     send_email,
+    search_emergency_contacts,
+    confirm_emergency_contact,
 )
 from core.agents_openai.prompts import QA_prompt
 
@@ -15,5 +17,5 @@ QA_agent = Agent(
     name="QA Agent",
     model="gpt-4o",
     instructions=QA_prompt,
-    tools=[set_reminder, update_user_info, send_telegram_message, send_email],
+    tools=[set_reminder, update_user_info, send_telegram_message, send_email, search_emergency_contacts, confirm_emergency_contact],
 )
