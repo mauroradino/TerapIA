@@ -268,3 +268,33 @@ async def send_emergency_message(patient_telegram_id: str, message: str) -> str:
         return "Emergency message sent successfully to the emergency contact."
     except Exception as e:
         return f"Error sending emergency message: {str(e)}"
+
+
+@function_tool
+def check_emergency_contact_status(patient_telegram_id: str) -> str:
+    """
+    Checks and returns the emergency contact status for a patient.
+    
+    Args:
+        patient_telegram_id (str): The Telegram ID of the patient.
+    Returns:
+        str: Detailed status of the emergency contact (state, name, email, telegram_id).
+    """
+    try:
+        res = supabase.table("Users").select("emergency_contact_state, emergency_contact").eq("telegram_id", patient_telegram_id).execute()
+        
+        if not res.data or len(res.data) == 0:
+            return "Error: Patient not found."
+        
+        patient = res.data[0]
+        emergency_contact_state = patient.get("emergency_contact_state")
+        emergency_contact = patient.get("emergency_contact", {})
+        
+        # Build detailed status message
+        status_msg = f"Emergency Contact Status:\n"
+        status_msg += f"State (True/False): {emergency_contact_state}\n"
+        status_msg += f"Full Data: {json.dumps(emergency_contact, indent=2)}"
+        
+        return status_msg
+    except Exception as e:
+        return f"Error checking emergency contact status: {str(e)}"
