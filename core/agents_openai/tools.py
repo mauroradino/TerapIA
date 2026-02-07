@@ -169,7 +169,7 @@ def IDC_codes(disease: str):
 
 
 @function_tool
-def search_emergency_contacts(contact_info: str) -> str:
+def search_emergency_contacts(contact_info: dict) -> str:
     """
     Searches for emergency contacts based on provided information.
     
@@ -179,7 +179,6 @@ def search_emergency_contacts(contact_info: str) -> str:
         str: Search results or error message.
     """
     try:
-        # Accept JSON string for strict schema compatibility
         contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
         res = supabase.table("Users").select("*").eq("emergency_contact", contact).execute()
         if res.data:

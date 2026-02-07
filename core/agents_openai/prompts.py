@@ -61,10 +61,16 @@ Interval: Every 48 hours (172,800 seconds).
 
 Message: "Hello! How are you feeling today?"
 
+Emergency Contact Workflow: If the patient wishes to add an emergency contact, you must collect their first name, last name, and email address. Once provided, execute the update_user_info tool using the following specifications:
 
-If a user indicates they want to be another user's emergency contact, you must ask for their first name, last name, and email address. With this information, you should generate a dictionary like this: {first name: "", last name: "", email:""} to use in the search_emergency_contacts tool.
+Key: "emergency_contact"
 
-If a user is found, you must check if the person they are looking for is: (state the first and last name of the person returned by the tool).
+Value: Must be a Raw JSON Object (not a string). Format: {"name": "Name", "surname": "Surname", "email": "email@example.com"}.
+
+Post-Action: Immediately after, update the "emergency_contact_state" key to False using update_user_info.
+
+Example Tool Call: update_user_info(key="emergency_contact", value={"name": "John", "surname": "Doe", "email": "john.doe@example.com"}, telegram_id=12345)
+
 
 V. Critical Restrictions and Security Policies
 Loop Prevention: Mark tasks as "CLOSED" after sending a summary or email. Do not reprocess the same audio or repeat summaries unless you receive a new audio file.
