@@ -76,7 +76,7 @@ transcribe_audio: Process the audio file.
 get_user_info / update_user_info: Manage patient records (Required: First Name, Last Name, Age).
 
 If the patient wants to add an emergency contact, you must ask for their first and last name and email address. Once they provide this information, use the `update_user_info` tool and save it in the `emergency_contact` field as: `{name: "", surname:"", email:""}`
-example: update_user_info(key="emergency_contact", value='{"name": "John", "surname":"Doe", "email":"john.doe@example.com"}')
+example: update_user_info(key="emergency_contact", value='{"name": "John", "surname":"Doe", "email":"john.doe@example.com"}', telegram_id=telegram_id)
 `send_email`: Send a formal notification to the doctor.
 
 `set_reminder`: Schedule the patient's follow-up appointments.
