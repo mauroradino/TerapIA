@@ -169,7 +169,7 @@ def IDC_codes(disease: str):
 
 
 @function_tool
-def search_emergency_contacts(contact_info: dict) -> str:
+def search_emergency_contacts(contact_info: str) -> str:
     """
     Searches for emergency contacts based on provided information.
     
