@@ -136,10 +136,20 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
         str: Confirmation message or error.
     """
     try:
-        res = supabase.table("Users").update({key: value}).eq("telegram_id", telegram_id).execute()
-        
-        if len(res.data) > 0:
-            return f"Success: Updated {key} to '{value}'."
+        # If updating emergency_contact, accept a JSON string and convert to dict
+        if key == "emergency_contact":
+            try:
+                contact_obj = json.loads(value) if isinstance(value, str) else value
+            except Exception:
+                return "Error: emergency_contact value must be a JSON string or dict."
+            payload = {key: contact_obj}
+        else:
+            payload = {key: value}
+
+        res = supabase.table("Users").update(payload).eq("telegram_id", telegram_id).execute()
+
+        if res.data and len(res.data) > 0:
+            return f"Success: Updated {key}."
         else:
             return "Warning: No user found with that ID to update."
 
@@ -166,6 +176,55 @@ def IDC_codes(disease: str):
             return json.dumps(data)
     else:
         return "Error retrieving ICD codes."
+
+
+@function_tool
+def init_emergency_contact(patient_telegram_id: str) -> str:
+    """Initialize emergency contact entry for a patient and mark state as pending (False)."""
+    try:
+        empty_contact = {"name": "", "surname": "", "email": "", "telegram_id": ""}
+        res = supabase.table("Users").update({"emergency_contact_state": False, "emergency_contact": empty_contact}).eq("telegram_id", patient_telegram_id).execute()
+        if res.data and len(res.data) > 0:
+            return "Initialized emergency contact; please ask the patient for name, surname and email."
+        else:
+            return "Warning: Patient not found to initialize emergency contact."
+    except Exception as e:
+        return f"Critical error initializing emergency contact: {str(e)}"
+
+
+@function_tool
+def find_patient_by_emergency_contact(name: str, surname: str, email: str) -> str:
+    """Search users whose emergency_contact matches the provided name/surname/email. Returns patient info JSON or not found message."""
+    try:
+        res = supabase.table("Users").select("*").execute()
+        if not res.data:
+            return "No users in database."
+
+        for user in res.data:
+            ec = user.get("emergency_contact") or {}
+            if not isinstance(ec, dict):
+                continue
+            if (ec.get("name") == name and ec.get("surname") == surname and ec.get("email") == email):
+                out = {"telegram_id": user.get("telegram_id"), "name": user.get("name", ""), "surname": user.get("surname", "")}
+                return json.dumps(out)
+
+        return "No matching emergency contact found for any patient."
+    except Exception as e:
+        return f"Error searching patients: {str(e)}"
+
+
+@function_tool
+def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str, contact_name: str, contact_surname: str, contact_email: str) -> str:
+    """Finalize the emergency contact linking: set patient's emergency_contact_state to True and save contact telegram id."""
+    try:
+        contact_obj = {"name": contact_name, "surname": contact_surname, "email": contact_email, "telegram_id": contact_telegram_id}
+        res = supabase.table("Users").update({"emergency_contact_state": True, "emergency_contact": contact_obj}).eq("telegram_id", patient_telegram_id).execute()
+        if res.data and len(res.data) > 0:
+            return "Emergency contact confirmed and linked."
+        else:
+            return "Warning: Patient not found to confirm emergency contact."
+    except Exception as e:
+        return f"Error confirming emergency contact: {str(e)}"
 
 
 @function_tool
