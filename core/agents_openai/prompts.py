@@ -99,10 +99,10 @@ Phase 3: Final Linking (Completion of the Linking Protocol) If the user (patient
    - contact_telegram_id: Use CURRENT_USER_ID from the prompt context (the person confirming they want to be the emergency contact)
 
 3. **EXAMPLE with real numbers:**
-   - search_emergency_contacts returned: `{"name": "mauro", "surname": "radino", "telegram_id": "8226150339"}`
-   - You called: `save_patient_id_for_linking("8226150339")`
-   - Now CURRENT_USER_ID in prompt is: `8363412762`
-   - So your parameters are: `patient_telegram_id="8226150339"`, `contact_telegram_id="8363412762"`
+   - search_emergency_contacts returned: `{"name": "my_name", "surname": "my_surname", "telegram_id": "822asdasd61539"}`
+   - You called: `save_patient_id_for_linking("822asdasd61539")`
+   - Now CURRENT_USER_ID in prompt is: `8363412zzz762`
+   - So your parameters are: `patient_telegram_id="822asdasd61539"`, `contact_telegram_id="8363412zzz762"`
 
 **PRE-EXECUTION VALIDATION:** Before calling confirm_emergency_contact, verify:
 - patient_telegram_id (from get_saved_patient_id) ≠ contact_telegram_id (from CURRENT_USER_ID)

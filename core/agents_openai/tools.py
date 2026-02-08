@@ -322,7 +322,7 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
 
 
 @function_tool
-def send_emergency_message(message: str, telegram_id:str) -> str:
+async def send_emergency_message(message: str, telegram_id:str) -> str:
     """
     Sends an emergency message to the specified contact.
     
@@ -337,7 +337,7 @@ def send_emergency_message(message: str, telegram_id:str) -> str:
         res = supabase.table("Users").select("*").eq("telegram_id", telegram_id).execute()
         msg_id = res.data[0].get("emergency_contact", {}).get("contact_telegram_id")
         print(f"DEBUG: Retrieved contact_telegram_id {msg_id}")
-        bot.send_message(msg_id, message)
+        await bot.send_message(msg_id, message)
         return "Emergency message sent successfully"
     except Exception as e:
         return f"Error sending emergency message: {e}"
