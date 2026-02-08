@@ -319,3 +319,24 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
 
     except Exception as e:
         return f"Backend Error: {str(e)}"
+
+
+@function_tool
+def send_emergency_message(message: str, telegram_id:str) -> str:
+    """
+    Sends an emergency message to the specified contact.
+    
+    Args:
+        message (str): The emergency message content to send.
+        telegram_id (str): The Telegram ID of the user.
+    
+    Returns:
+        str: Confirmation message or error.
+    """
+    try:
+        res = supabase.table("Users").select("*").eq("telegram_id", telegram_id).execute()
+        msg_id = res.data[0].get("emergency_contact", {}).get("contact_telegram_id")
+        bot.send_message(msg_id, message)
+        return "Emergency message sent successfully"
+    except Exception as e:
+        return f"Error sending emergency message: {e}"
