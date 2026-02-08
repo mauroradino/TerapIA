@@ -193,8 +193,8 @@ def search_emergency_contacts(contact_info: str) -> str:
         res = supabase.table("Users").select("*").contains("emergency_contact", contact).execute()
         
         if res.data:
-            print(f"DATOS ENCONTRADOS {json.dumps(res.data)}")
-            return json.dumps(res.data)
+            
+            return f"Found matching emergency contacts: {json.dumps(res.data)} Telegram IDs of matching patients: {[user['telegram_id'] for user in res.data]}"
         else:
             return "No matching emergency contacts found."
     except Exception as e:
