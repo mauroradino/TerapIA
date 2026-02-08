@@ -221,34 +221,35 @@ def set_emergency_contact(name: str, surname: str, email: str) -> str:
         return "Error storing emergency contact information."        
 
 @function_tool
-def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id:str) -> str:
+def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str) -> str:
     """
-    Confirms and links an emergency contact to a patient.
-    
-    Args:
-        patient_telegram_id (str): Telegram ID of the patient.
-        contact_telegram_id (str): Telegram ID of the emergency contact.
-    Returns:
-        str: Confirmation message or error.
+    Links the emergency contact's Telegram ID to the patient's record.
     """
     try:
+        # 1. Buscamos el registro del paciente
         res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
         
         if not res.data:
             return "Patient record not found."
 
-        updated_contact_info = res.data[0].get("emergency_contact", {})
-        updated_contact_info["contact_telegram_id"] = contact_telegram_id # Guardamos el ID del familiar
+        # 2. Obtenemos el JSON actual o creamos uno si está vacío
+        current_contact = res.data[0].get("emergency_contact")
+        if current_contact is None:
+            current_contact = {}
+            
+        # 3. Inyectamos el ID del contacto
+        current_contact["contact_telegram_id"] = contact_telegram_id
 
+        # 4. Actualizamos estado y JSON
         update_res = supabase.table("Users").update({
             "emergency_contact_state": True,
-            "emergency_contact": updated_contact_info
+            "emergency_contact": current_contact
         }).eq("telegram_id", patient_telegram_id).execute()
         
         if update_res.data:
-            return f"Emergency contact linked successfully to patient {patient_telegram_id}."
+            return "SUCCESS: Emergency contact linked and activated."
         else:
-            return "Failed to update emergency contact record."
+            return "ERROR: Could not update the patient record."
 
     except Exception as e:
-        return f"Error in confirmation workflow: {str(e)}"
+        return f"CRITICAL ERROR: {str(e)}"
