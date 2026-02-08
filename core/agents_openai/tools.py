@@ -156,18 +156,6 @@ def update_user_info(key: str, value: str, telegram_id: str) -> str:
 
     except Exception as e:
         return f"Critical error: {str(e)}"
-
-
-@function_tool
-def get_current_user_telegram_id() -> str:
-    """
-    Returns confirmation that the system has the current user's Telegram ID ready.
-    The contact_telegram_id for confirm_emergency_contact should be extracted from the conversation context.
-    
-    Returns:
-        str: Instructions for the agent on how to obtain the contact's ID
-    """
-    return "To confirm an emergency contact: extract the contact's telegram_id from the current conversation context (the user who wants to be a contact) and pass it as contact_telegram_id to confirm_emergency_contact()."
     
 
 @function_tool
