@@ -227,12 +227,16 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
     Updates the PATIENT's row with the contact's Telegram ID.
     """
     try:
+        if patient_telegram_id == contact_telegram_id:
+            return "Error: Patient and Contact IDs cannot be the same."
+
         res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
         
         if not res.data:
-            return f"Error: Patient record {patient_telegram_id} not found."
+            return f"Error: Patient record with ID {patient_telegram_id} not found."
 
         current_data = res.data[0].get("emergency_contact") or {}
+        
         current_data["contact_telegram_id"] = contact_telegram_id
 
         update_res = supabase.table("Users").update({
@@ -241,9 +245,9 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
         }).eq("telegram_id", patient_telegram_id).execute()
         
         if update_res.data:
-            return "SUCCESS: Handshake complete. Patient record updated."
+            return f"SUCCESS: Handshake complete. Patient {patient_telegram_id} linked to Contact {contact_telegram_id}."
         else:
-            return "Failed to update the patient's database record."
+            return "Failed to update the patient's record."
 
     except Exception as e:
         return f"Backend Error: {str(e)}"
