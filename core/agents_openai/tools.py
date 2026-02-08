@@ -194,7 +194,7 @@ def search_emergency_contacts(contact_info: str) -> str:
         
         if res.data:
             
-            return f"Found matching emergency contacts: {json.dumps(res.data)} Telegram IDs of matching patients: {[user['telegram_id'] for user in res.data]}"
+            return json.dumps(res.data)
         else:
             return "No matching emergency contacts found."
     except Exception as e:
