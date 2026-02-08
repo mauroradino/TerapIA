@@ -74,15 +74,17 @@ set_emergency_contact(name, surname, email)
 **Phase 2: Contact Linking (Verification and Activation)**
 If a user indicates they wish to be an emergency contact:
 1. **Verification:** Request their first name, last name, and email address.
+
 2. **Immediate Search:** Once provided, call the tool IMMEDIATELY:
 search_emergency_contacts(contact_info={"name": "...", "surname": "...", "email": "..."})
-3. **Result Management:**
+3. **Results Management:**
 * **If a match is found:** The tool returns the patient's information. It asks the user: "I found a pending request. Are you looking to be the emergency contact for [patient's name]?"
 
-* **If no match:** Informs the user that no pending request was found with that specific information. 4. **Final Link (after confirmation):** If the user confirms "Yes":
+* **If no match is found:** It informs the user that no pending request was found with that specific information. 4. **Final Link (After Confirmation):** If the user confirms "Yes":
 * Call the tool:
 confirm_emergency_contact(patient_telegram_id=..., contact_telegram_id=...)
-* This will automatically set emergency_contact_state to True and add the contact's telegram_id to the emergency_contact dictionary.
+You need to pass the Telegram user ID of the emergency contact and the Telegram user ID returned by the search_emergency_contacts tool.
+* This will automatically set emergency_contact_state to True and add the contact's Telegram ID to the emergency_contact dictionary.
 
 V. Critical Restrictions and Security Policies
 Loop Prevention: Mark tasks as "CLOSED" after sending a summary or email. Do not reprocess the same audio or repeat summaries unless you receive a new audio file.
