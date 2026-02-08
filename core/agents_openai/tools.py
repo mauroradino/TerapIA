@@ -328,7 +328,7 @@ async def send_emergency_message(message: str, telegram_id:str) -> str:
     
     Args:
         message (str): The emergency message content to send.
-        telegram_id (str): The Telegram ID of the user.
+        telegram_id (str): The Telegram ID of the current user (the patient).
     
     Returns:
         str: Confirmation message or error.
