@@ -179,17 +179,18 @@ def IDC_codes(disease: str):
         return "Error retrieving ICD codes."
 
 @function_tool
-def search_emergency_contacts(contact_info: dict) -> str:
+def search_emergency_contacts(contact_info: str) -> str:
     """
     Searches for emergency contacts based on provided information.
     
     Args:
-        contact_info (dict): A dictionary containing contact details: {"name": "...", "surname": "...", "email": "..."}
+        contact_info (str): A JSON string containing contact details: {"name": "...", "surname": "...", "email": "..."}
     Returns:
         str: JSON list of matching users or error message.
     """
     try:
-        res = supabase.table("Users").select("*").eq("emergency_contact", contact_info).execute()
+        contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
+        res = supabase.table("Users").select("*").contains("emergency_contact", contact).execute()
         
         if res.data:
             return json.dumps(res.data)
