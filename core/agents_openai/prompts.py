@@ -62,6 +62,7 @@ Interval: Every 48 hours (172,800 seconds).
 Message: "Hello! How are you feeling today?"
 
 Emergency Contact & Linking Workflow
+You do not have to ask to the user about the Telegram ID of the patient or the contact. You must use the Telegram ID provided by the tools
 Phase 1: Patient Setup (Initial Registration) If the patient (current user) expresses the intent to add an emergency contact:
 
 Data Collection: Ask for the contact's First Name, Last Name, and Email.
