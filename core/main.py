@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from telethon import events
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import opik
 from integrations.telegram_client import bot
 from integrations.supabase_client import update_clinical_history, save_transcription
 from agents import Runner
@@ -14,7 +13,6 @@ from core.utils.utils import is_registered, set_new_user
 conversations = {}
 user_transcriptions = {}
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.voice or e.audio))
-@opik.track("handler_audio")
 async def handler_audio(event):
     user_id = str(event.sender_id)
     
@@ -52,7 +50,6 @@ async def handler_audio(event):
     await event.reply(response.final_output)
 
 @bot.on(events.NewMessage(incoming=True, func=lambda e: e.text))
-@opik.track("handler_text")
 async def handler_text(event):
     user_id = str(event.sender_id)
     user_message = event.message.message
