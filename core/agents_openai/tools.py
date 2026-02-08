@@ -227,18 +227,8 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
     Updates the PATIENT's row with the contact's Telegram ID.
     """
     try:
-        # Normalize contact_telegram_id: strip common prefixes and validate numeric
-        raw_contact_id = str(contact_telegram_id)
-        # if agent passed a label like 'user_telegram_id' or text, try to extract digits
-        import re
-        digits = re.findall(r"\d+", raw_contact_id)
-        if digits:
-            normalized_contact_id = digits[0]
-        else:
-            # if no digits found, reject early
-            return "Error: contact_telegram_id is invalid or missing numeric ID. Provide the numeric Telegram ID of the contact."
-
-        if str(patient_telegram_id) == str(normalized_contact_id):
+        print(f"Patient ID: {patient_telegram_id}, Contact ID: {contact_telegram_id}")
+        if patient_telegram_id == contact_telegram_id:
             return "Error: Patient and Contact IDs cannot be the same."
 
         res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
@@ -247,8 +237,8 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
             return f"Error: Patient record with ID {patient_telegram_id} not found."
 
         current_data = res.data[0].get("emergency_contact") or {}
-        # set the normalized telegram id inside the emergency_contact dict
-        current_data["contact_telegram_id"] = normalized_contact_id
+        
+        current_data["contact_telegram_id"] = contact_telegram_id
 
         update_res = supabase.table("Users").update({
             "emergency_contact_state": True,
