@@ -201,6 +201,49 @@ def search_emergency_contacts(contact_info: str) -> str:
         return f"Error searching for emergency contacts: {str(e)}"
 
 
+# Module-level storage for temporarily saving IDs during conversation
+_pending_contact_link = {}
+
+@function_tool
+def save_patient_id_for_linking(patient_telegram_id: str) -> str:
+    """
+    CRITICAL HELPER: Saves the patient's telegram_id from search results temporarily.
+    Call this IMMEDIATELY after search_emergency_contacts returns results.
+    This ensures the patient ID is not lost if the conversation continues.
+    
+    Args:
+        patient_telegram_id (str): The numeric telegram_id extracted from search results.
+    
+    Returns:
+        str: Confirmation that ID was saved.
+    """
+    global _pending_contact_link
+    import re
+    
+    # Extract numeric part
+    nums = re.findall(r"\d+", str(patient_telegram_id))
+    if not nums:
+        return f"ERROR: '{patient_telegram_id}' is not a valid numeric ID. Extract from search result: {{'telegram_id': '8226150339'}}"
+    
+    _pending_contact_link['patient_id'] = nums[0]
+    return f"SAVED: Patient ID {nums[0]} is now stored. When ready to confirm, call confirm_emergency_contact with patient_telegram_id='{nums[0]}' and contact_telegram_id=CURRENT_USER_ID."
+
+
+@function_tool
+def get_saved_patient_id() -> str:
+    """
+    HELPER: Retrieves the patient_telegram_id saved in the current conversation.
+    Use this to avoid losing the patient ID between message turns.
+    
+    Returns:
+        str: The saved patient ID or error if none saved.
+    """
+    global _pending_contact_link
+    if 'patient_id' in _pending_contact_link:
+        return f"Saved patient ID: {_pending_contact_link['patient_id']}"
+    else:
+        return "No patient ID saved yet. Call save_patient_id_for_linking first after search_emergency_contacts."
+
 
 @function_tool
 def set_emergency_contact(name: str, surname: str, email: str) -> str:
@@ -226,28 +269,51 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
     """
     Finalizes the link between a contact and a patient.
     Updates the PATIENT's row with the contact's Telegram ID.
+    CRITICAL: patient_telegram_id and contact_telegram_id MUST BE DIFFERENT.
+    If they are the same, it means you used the wrong ID (likely CURRENT_USER_ID for both).
     """
     try:
-        print(f"Patient ID: {patient_telegram_id}, Contact ID: {contact_telegram_id}")
-        if patient_telegram_id == contact_telegram_id:
-            return "Error: Patient and Contact IDs cannot be the same."
+        import re
+        
+        # Extract numeric IDs in case agent passed textual descriptions
+        patient_nums = re.findall(r"\d+", str(patient_telegram_id))
+        contact_nums = re.findall(r"\d+", str(contact_telegram_id))
+        
+        if not patient_nums:
+            return f"ERROR: patient_telegram_id '{patient_telegram_id}' has no numeric ID. Extract the numeric telegram_id from search_emergency_contacts result."
+        if not contact_nums:
+            return f"ERROR: contact_telegram_id '{contact_telegram_id}' has no numeric ID. Use CURRENT_USER_ID from the prompt."
+        
+        patient_id_clean = patient_nums[0]
+        contact_id_clean = contact_nums[0]
+        
+        print(f"[DEBUG] Patient ID (numeric): {patient_id_clean}, Contact ID (numeric): {contact_id_clean}")
+        
+        # CRITICAL VALIDATION
+        if patient_id_clean == contact_id_clean:
+            return (
+                f"CRITICAL ERROR: patient_telegram_id ({patient_id_clean}) == contact_telegram_id ({contact_id_clean})\n"
+                f"These must be DIFFERENT (two different people).\n"
+                f"- patient_telegram_id should come from search_emergency_contacts result (e.g., '8226150339')\n"
+                f"- contact_telegram_id should come from CURRENT_USER_ID in prompt (e.g., '8363412762')\n"
+                f"You appear to have used the same ID for both. Did you forget to extract the patient ID from the search result?"
+            )
 
-        res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
+        res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_id_clean).execute()
         
         if not res.data:
-            return f"Error: Patient record with ID {patient_telegram_id} not found."
+            return f"Error: Patient record with ID {patient_id_clean} not found. Verify the ID from search_emergency_contacts is correct."
 
         current_data = res.data[0].get("emergency_contact") or {}
-        
-        current_data["contact_telegram_id"] = contact_telegram_id
+        current_data["contact_telegram_id"] = contact_id_clean
 
         update_res = supabase.table("Users").update({
             "emergency_contact_state": True,
             "emergency_contact": current_data
-        }).eq("telegram_id", patient_telegram_id).execute()
+        }).eq("telegram_id", patient_id_clean).execute()
         
         if update_res.data:
-            return f"SUCCESS: Handshake complete. Patient {patient_telegram_id} linked to Contact {contact_telegram_id}."
+            return f"SUCCESS: Handshake complete. Patient {patient_id_clean} linked to Contact {contact_id_clean}."
         else:
             return "Failed to update the patient's record."
 

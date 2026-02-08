@@ -78,21 +78,40 @@ Search Trigger: Once received, call `search_emergency_contacts(contact_info={"na
 
 Validation Step:
 
-If a match is found: The tool returns the patient's name and Telegram ID. You should ask: "I found a pending request. Are you looking to be the emergency contact for [patient's name]?"
+If a match is found: The tool returns the patient's name and Telegram ID. 
+
+**CRITICAL - SAVE THE PATIENT ID NOW:**
+1. Extract the `telegram_id` field from the search result. This is the PATIENT'S ID. Do NOT confuse it with CURRENT_USER_ID.
+2. **Immediately call `save_patient_id_for_linking(patient_telegram_id="<the_id_from_search>")` to store it.**
+3. Repeat it back to the user to confirm: "I found a pending request for [patient's name] (ID: <<telegram_id from search result>>). Are you looking to be their emergency contact?"
 
 If there is no match: Inform the user: "I couldn't find a pending request with that information. Please make sure the patient has registered their information correctly."
 
 Phase 3: Final Linking (Completion of the Linking Protocol) If the user (patient's emergency contact) confirms with "Yes":
 
-ID Assignment (IMPORTANT - DO NOT REVERSE DATA):
+**MANDATORY ID RETRIEVAL AND ASSIGNMENT (DO NOT REVERSE - CHECK TWICE):**
 
-patient_telegram_id: Use the exact Telegram ID of the patient that search_emergency_contacts returned in the previous session.
+1. RETRIEVE the saved patient ID: Call `get_saved_patient_id()` to get the patient_telegram_id from Phase 2.
+   - If it returns an error, inform the user: "I lost track of the patient ID. Please tell me the patient's name again so I can search again."
 
-contact_telegram_id: Use the Telegram ID of the person communicating with the bot (the emergency contact).
+2. Set your parameters:
+   - patient_telegram_id: Use the value returned by `get_saved_patient_id()` (from Phase 2 search result)
+   - contact_telegram_id: Use CURRENT_USER_ID from the prompt context (the person confirming they want to be the emergency contact)
 
-Perform the final linking IMMEDIATELY: Call confirm_emergency_contact(patient_telegram_id=..., contact_telegram_id=...). Do not exchange these IDs. The first one is the ID provided by the search_emergency_contacts tool, and the second one is the Telegram ID of the user confirming the connection.
+3. **EXAMPLE with real numbers:**
+   - search_emergency_contacts returned: `{"name": "mauro", "surname": "radino", "telegram_id": "8226150339"}`
+   - You called: `save_patient_id_for_linking("8226150339")`
+   - Now CURRENT_USER_ID in prompt is: `8363412762`
+   - So your parameters are: `patient_telegram_id="8226150339"`, `contact_telegram_id="8363412762"`
 
-Success message: Once the tool confirms, notify the user: "Successful connection. You are now the official emergency contact for [Patient Name]."
+**PRE-EXECUTION VALIDATION:** Before calling confirm_emergency_contact, verify:
+- patient_telegram_id (from get_saved_patient_id) ≠ contact_telegram_id (from CURRENT_USER_ID)
+- They MUST be DIFFERENT (two different people)
+- If they are the same, something went wrong—inform the user and request a fresh search.
+
+Execute IMMEDIATELY if validation passes: Call confirm_emergency_contact(patient_telegram_id="<from_saved>", contact_telegram_id="<from_CURRENT_USER_ID>")
+
+Success message: Once confirmed, notify: "Successful! You are now the official emergency contact for [Patient Name]."
 V. Critical Restrictions and Security Policies
 Loop Prevention: Mark tasks as "CLOSED" after sending a summary or email. Do not reprocess the same audio or repeat summaries unless you receive a new audio file.
 
