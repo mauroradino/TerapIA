@@ -74,9 +74,8 @@ set_emergency_contact(name, surname, email)
 **Phase 2: Contact Linking (Verification and Activation)**
 If a user indicates they wish to be an emergency contact:
 1. **Verification:** Request their first name, last name, and email address.
-
 2. **Immediate Search:** Once provided, call the tool IMMEDIATELY:
-search_emergency_contacts(contact_info=JSON string {"name": "...", "surname": "...", "email": "..."})
+search_emergency_contacts(contact_info={"name": "...", "surname": "...", "email": "..."})
 3. **Result Management:**
 * **If a match is found:** The tool returns the patient's information. It asks the user: "I found a pending request. Are you looking to be the emergency contact for [patient's name]?"
 

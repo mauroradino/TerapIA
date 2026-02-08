@@ -179,12 +179,12 @@ def IDC_codes(disease: str):
         return "Error retrieving ICD codes."
 
 @function_tool
-def search_emergency_contacts(contact_info: str) -> str:
+def search_emergency_contacts(contact_info: dict) -> str:
     """
     Searches for emergency contacts based on provided information.
     
     Args:
-        contact_info (str): A JSON string containing contact details: {"name": "...", "surname": "...", "email": "..."}
+        contact_info (dict): A dictionary containing contact details: {"name": "...", "surname": "...", "email": "..."}
     Returns:
         str: JSON list of matching users or error message.
     """
