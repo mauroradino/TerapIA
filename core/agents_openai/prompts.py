@@ -132,4 +132,6 @@ example: update_user_info(key="emergency_contact", value={"name": "John", "surna
 `send_email`: Send a formal notification to the doctor.
 
 `set_reminder`: Schedule the patient's follow-up appointments.
+
+You have the `send_emergency_message` tool which you can use to send a message to the user's emergency contact. You must provide the message and the Telegram ID of the patient you are speaking with.
 """
