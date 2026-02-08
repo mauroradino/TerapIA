@@ -2,6 +2,7 @@ from agents import function_tool
 import os 
 from dotenv import load_dotenv
 from pathlib import Path
+from typing import Optional
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from integrations.telegram_client import bot
@@ -188,9 +189,7 @@ def search_emergency_contacts(contact_info: str) -> str:
         str: JSON list of matching users or error message.
     """
     try:
-        contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
-        
-        res = supabase.table("Users").select("name, surname, telegram_id").contains("emergency_contact", contact).execute()
+        res = supabase.table("Users").select("*").eq("emergency_contact", contact_info).execute()
         
         if res.data:
             return json.dumps(res.data)
@@ -200,101 +199,48 @@ def search_emergency_contacts(contact_info: str) -> str:
         return f"Error searching for emergency contacts: {str(e)}"
 
 
+
 @function_tool
-def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str, contact_name: str, contact_surname: str, contact_email: str) -> str:
+def set_emergency_contact_(name: str, surname: str, email: str, telegram_id: Optional[str] = None) -> str:
     """
-    Confirms and finalizes the emergency contact linking for a patient.
-    Updates the patient's emergency_contact dict to include the contact's telegram_id and sets emergency_contact_state to True.
+    Stores emergency contact information for a user.
     
     Args:
-        patient_telegram_id (str): The Telegram ID of the patient.
-        contact_telegram_id (str): The Telegram ID of the emergency contact person.
-        contact_name (str): First name of the emergency contact.
-        contact_surname (str): Last name of the emergency contact.
-        contact_email (str): Email of the emergency contact.
+        name (str): First name of the emergency contact.
+        surname (str): Last name of the emergency contact.
+        email (str): Email of the emergency contact.
+    Returns:
+        str: Confirmation message or error.
+    """
+    data = {"name": name.lower(), "surname": surname.lower(), "email": email.lower()}
+    res = supabase.table("Users").insert({"emergency_contact": data}).execute()
+    if res.data:
+        return "Emergency contact information stored successfully."
+    else:
+        return "Error storing emergency contact information."        
+
+@function_tool
+def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id:str) -> str:
+    """
+    Confirms and links an emergency contact to a patient.
+    
+    Args:
+        patient_telegram_id (str): Telegram ID of the patient.
+        contact_telegram_id (str): Telegram ID of the emergency contact.
     Returns:
         str: Confirmation message or error.
     """
     try:
-        # Build the updated emergency_contact object with telegram_id included
-        contact_obj = {
-            "name": contact_name,
-            "surname": contact_surname,
-            "email": contact_email,
-            "telegram_id": contact_telegram_id
-        }
+        # Update patient's emergency_contact_state to True
+        res_patient = supabase.table("Users").update({"emergency_contact_state": True}).eq("telegram_id", patient_telegram_id).execute()
+        existent_emergency_contact = res_patient.data[0].get("emergency_contact", {})
+        existent_emergency_contact["telegram_id"] = contact_telegram_id
+        res_contact = supabase.table("Users").update(existent_emergency_contact).eq("telegram_id", patient_telegram_id).execute()
         
-        res = supabase.table("Users").update({
-            "emergency_contact": contact_obj,
-            "emergency_contact_state": True
-        }).eq("telegram_id", patient_telegram_id).execute()
-        
-        if res.data and len(res.data) > 0:
-            return "Emergency contact confirmed and linked successfully. emergency_contact_state is now True."
+        if res_patient.data and res_contact.data:
+            return "Emergency contact confirmed and linked successfully."
         else:
-            return "Warning: Patient not found to confirm emergency contact."
-    except Exception as e:
-        return f"Error confirming emergency contact: {str(e)}"
+            return "Error confirming emergency contact."
 
-@function_tool
-async def send_emergency_message(patient_telegram_id: str, message: str) -> str:
-    """
-    Sends an emergency message to the patient's emergency contact.
-    Verifies that emergency_contact_state is True before sending.
-    
-    Args:
-        patient_telegram_id (str): The Telegram ID of the patient.
-        message (str): The emergency message content to send to the contact.
-    Returns:
-        str: Confirmation message or error.
-    """
-    try:
-        res = supabase.table("Users").select("emergency_contact_state, emergency_contact").eq("telegram_id", patient_telegram_id).execute()
-        
-        if not res.data or len(res.data) == 0:
-            return "Error: Patient not found."
-        
-        patient = res.data[0]
-        emergency_contact_state = patient.get("emergency_contact_state", False)
-        emergency_contact = patient.get("emergency_contact", {})
-        if not emergency_contact_state:
-            return "Error: Patient's emergency_contact_state is not enabled. Cannot send emergency message."
-        
-        contact_telegram_id = emergency_contact.get("telegram_id")
-        if not contact_telegram_id:
-            return "Error: No emergency contact telegram_id found for this patient."
-        
-        await bot.send_message(contact_telegram_id, message)
-        return "Emergency message sent successfully to the emergency contact."
     except Exception as e:
-        return f"Error sending emergency message: {str(e)}"
-
-
-@function_tool
-def check_emergency_contact_status(patient_telegram_id: str) -> str:
-    """
-    Checks and returns the emergency contact status for a patient.
-    
-    Args:
-        patient_telegram_id (str): The Telegram ID of the patient.
-    Returns:
-        str: Detailed status of the emergency contact (state, name, email, telegram_id).
-    """
-    try:
-        res = supabase.table("Users").select("emergency_contact_state, emergency_contact").eq("telegram_id", patient_telegram_id).execute()
-        
-        if not res.data or len(res.data) == 0:
-            return "Error: Patient not found."
-        
-        patient = res.data[0]
-        emergency_contact_state = patient.get("emergency_contact_state")
-        emergency_contact = patient.get("emergency_contact", {})
-        
-        # Build detailed status message
-        status_msg = f"Emergency Contact Status:\n"
-        status_msg += f"State (True/False): {emergency_contact_state}\n"
-        status_msg += f"Full Data: {json.dumps(emergency_contact, indent=2)}"
-        
-        return status_msg
-    except Exception as e:
-        return f"Error checking emergency contact status: {str(e)}"
+        return f"Critical error: {str(e)}"
