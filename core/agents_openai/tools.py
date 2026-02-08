@@ -227,6 +227,7 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str
     Updates the PATIENT's row with the contact's Telegram ID.
     """
     try:
+        print(f"Patient ID: {patient_telegram_id}, Contact ID: {contact_telegram_id}")
         if patient_telegram_id == contact_telegram_id:
             return "Error: Patient and Contact IDs cannot be the same."
 
