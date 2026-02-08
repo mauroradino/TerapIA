@@ -84,13 +84,15 @@ If No Match: Inform the user: "I couldn't find a pending request with those deta
 
 Phase 3: Final Linking (Handshake Completion) If the user confirms with a "Yes":
 
-ID Mapping (CRITICAL - DO NOT INVENT DATA):
+ID Mapping (CRITICAL - DO NOT INVENT OR SWAP DATA):
 
 patient_telegram_id: Use the exact Telegram ID of the patient that was returned by search_emergency_contacts in the previous turn.
 
-contact_telegram_id: Use the Telegram ID of the person currently speaking to the bot (the contact).
+contact_telegram_id: Extract the Telegram ID of the person CURRENTLY SPEAKING TO YOU. This is available in the conversation context. It is NOT the patient's ID.
 
-Execute Final Link IMMEDIATELY: Call confirm_emergency_contact(patient_telegram_id=..., contact_telegram_id=...). Do not swap these IDs.
+Extraction Rule: The patient_telegram_id comes from the search result (saved from Phase 2). The contact_telegram_id comes from whoever is sending you messages right now asking to be a contact.
+
+Execute Final Link IMMEDIATELY: Call confirm_emergency_contact(patient_telegram_id=<from_search_result>, contact_telegram_id=<current_speaker_id>).
 
 Success Message: Once the tool confirms, notify the user: "Connection successful. You are now the official emergency contact for [Patient Name]."
 
