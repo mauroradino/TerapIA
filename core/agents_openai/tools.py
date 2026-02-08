@@ -223,33 +223,27 @@ def set_emergency_contact(name: str, surname: str, email: str) -> str:
 @function_tool
 def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id: str) -> str:
     """
-    Links the emergency contact's Telegram ID to the patient's record.
+    Finalizes the link between a contact and a patient.
+    Updates the PATIENT's row with the contact's Telegram ID.
     """
     try:
-        # 1. Buscamos el registro del paciente
         res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
         
         if not res.data:
-            return "Patient record not found."
+            return f"Error: Patient record {patient_telegram_id} not found."
 
-        # 2. Obtenemos el JSON actual o creamos uno si está vacío
-        current_contact = res.data[0].get("emergency_contact")
-        if current_contact is None:
-            current_contact = {}
-            
-        # 3. Inyectamos el ID del contacto
-        current_contact["contact_telegram_id"] = contact_telegram_id
+        current_data = res.data[0].get("emergency_contact") or {}
+        current_data["contact_telegram_id"] = contact_telegram_id
 
-        # 4. Actualizamos estado y JSON
         update_res = supabase.table("Users").update({
             "emergency_contact_state": True,
-            "emergency_contact": current_contact
+            "emergency_contact": current_data
         }).eq("telegram_id", patient_telegram_id).execute()
         
         if update_res.data:
-            return "SUCCESS: Emergency contact linked and activated."
+            return "SUCCESS: Handshake complete. Patient record updated."
         else:
-            return "ERROR: Could not update the patient record."
+            return "Failed to update the patient's database record."
 
     except Exception as e:
-        return f"CRITICAL ERROR: {str(e)}"
+        return f"Backend Error: {str(e)}"
