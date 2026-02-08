@@ -38,6 +38,7 @@ async def handler_audio(event):
     prompt_audio = (
         f"MEDICAL PROTOCOL ACTIVATED\n"
         f"CURRENT PATIENT DATA: {user_data}\n" 
+        f"CURRENT_USER_ID: {user_id}\n"
         f"TRANSCRIPTION: {transcription}\n"
         f"TASK: 1. Greet formally 2. Check if the PATIENT DATA is missing Name, Surname or Age."
         f"3. If they are complete, send the structured summary directly. "
@@ -67,6 +68,7 @@ async def handler_text(event):
     prompt_text = (
         f"CONTEXT OF THE LAST CONSULTATION: {last_transcription}\n"
         f"CURRENT PATIENT DATA: {user_data}\n"
+        f"CURRENT_USER_ID: {user_id}\n"
         f"USER MESSAGE: {user_message}\n"
         f"RECENT HISTORY: {history}\n\n"
         "INSTRUCTION: Respond naturally. If it's a greeting, be brief. "
