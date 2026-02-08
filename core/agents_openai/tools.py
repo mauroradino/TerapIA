@@ -193,6 +193,7 @@ def search_emergency_contacts(contact_info: str) -> str:
         res = supabase.table("Users").select("name, surname, telegram_id").contains("emergency_contact", contact).execute()
         
         if res.data:
+            print(f"datos de search tool {res.data}")
             return json.dumps(res.data)
         else:
             return "No matching emergency contacts found."
