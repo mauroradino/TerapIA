@@ -84,9 +84,9 @@ If No Match: Inform the user: "I couldn't find a pending request with those deta
 
 Phase 3: Final Linking (Handshake Completion) If the user confirms with a "Yes":
 
-ID Mapping (CRITICAL - DO NOT USE CURRENT USER ID FOR PATIENT):
+ID Mapping (CRITICAL - DO NOT INVENT DATA):
 
-patient_telegram_id: You MUST use the exact telegram_id that was returned by the search_emergency_contacts tool in the previous turn. This identifies the patient's row in the database.
+patient_telegram_id: Use the exact Telegram ID of the patient that was returned by search_emergency_contacts in the previous turn.
 
 contact_telegram_id: Use the Telegram ID of the person currently speaking to the bot (the contact).
 
