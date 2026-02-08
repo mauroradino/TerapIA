@@ -190,7 +190,7 @@ def search_emergency_contacts(contact_info: str) -> str:
     """
     try:
         contact = json.loads(contact_info) if isinstance(contact_info, str) else contact_info
-        res = supabase.table("Users").select("*").contains("emergency_contact", contact).execute()
+        res = supabase.table("Users").select("name, surname, telegram_id").contains("emergency_contact", contact).execute()
         
         if res.data:
             
