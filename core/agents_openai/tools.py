@@ -232,16 +232,23 @@ def confirm_emergency_contact(patient_telegram_id: str, contact_telegram_id:str)
         str: Confirmation message or error.
     """
     try:
-        # Update patient's emergency_contact_state to True
-        res_patient = supabase.table("Users").update({"emergency_contact_state": True}).eq("telegram_id", patient_telegram_id).execute()
-        existent_emergency_contact = res_patient.data[0].get("emergency_contact", {})
-        existent_emergency_contact["telegram_id"] = contact_telegram_id
-        res_contact = supabase.table("Users").update(existent_emergency_contact).eq("telegram_id", patient_telegram_id).execute()
+        res = supabase.table("Users").select("emergency_contact").eq("telegram_id", patient_telegram_id).execute()
         
-        if res_patient.data and res_contact.data:
-            return "Emergency contact confirmed and linked successfully."
+        if not res.data:
+            return "Patient record not found."
+
+        updated_contact_info = res.data[0].get("emergency_contact", {})
+        updated_contact_info["contact_telegram_id"] = contact_telegram_id # Guardamos el ID del familiar
+
+        update_res = supabase.table("Users").update({
+            "emergency_contact_state": True,
+            "emergency_contact": updated_contact_info
+        }).eq("telegram_id", patient_telegram_id).execute()
+        
+        if update_res.data:
+            return f"Emergency contact linked successfully to patient {patient_telegram_id}."
         else:
-            return "Error confirming emergency contact."
+            return "Failed to update emergency contact record."
 
     except Exception as e:
-        return f"Critical error: {str(e)}"
+        return f"Error in confirmation workflow: {str(e)}"
