@@ -201,7 +201,7 @@ def search_emergency_contacts(contact_info: str) -> str:
 
 
 @function_tool
-def set_emergency_contact_(name: str, surname: str, email: str, telegram_id: Optional[str] = None) -> str:
+def set_emergency_contact(name: str, surname: str, email: str, telegram_id: Optional[str] = None) -> str:
     """
     Stores emergency contact information for a user.
     
