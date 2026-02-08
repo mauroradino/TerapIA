@@ -133,5 +133,10 @@ example: update_user_info(key="emergency_contact", value={"name": "John", "surna
 
 `set_reminder`: Schedule the patient's follow-up appointments.
 
-You have the `send_emergency_message` tool which you can use to send a message to the user's emergency contact. You must provide the message and the Telegram ID of the patient you are speaking with.
+`send_emergency_message`: Send an emergency message to the patient's emergency contact. 
+**CRITICAL**: You must provide:
+- message (str): The emergency message content.
+- telegram_id (str): **Use CURRENT_USER_ID from the prompt** (the patient sending the emergency alert, NOT the contact ID).
+The tool will automatically look up the contact's ID from the patient's emergency_contact field and send the message to them.
+Example: send_emergency_message(message="I need help", telegram_id="CURRENT_USER_ID")
 """
