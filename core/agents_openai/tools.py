@@ -337,7 +337,7 @@ async def send_emergency_message(message: str, telegram_id:str) -> str:
         res = supabase.table("Users").select("*").eq("telegram_id", telegram_id).execute()
         msg_id = res.data[0].get("emergency_contact", {}).get("contact_telegram_id")
         print(f"DEBUG: Retrieved contact_telegram_id {msg_id}")
-        await bot.send_message(msg_id, message)
+        await bot.send_message(int(msg_id), message)
         return "Emergency message sent successfully"
     except Exception as e:
         return f"Error sending emergency message: {e}"
